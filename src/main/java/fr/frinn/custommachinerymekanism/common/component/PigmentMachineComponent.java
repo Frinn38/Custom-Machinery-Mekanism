@@ -10,6 +10,7 @@ import fr.frinn.custommachinerymekanism.common.utils.Codecs;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.pigment.PigmentStack;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
@@ -36,8 +37,8 @@ public class PigmentMachineComponent extends ChemicalMachineComponent<Pigment, P
     }
 
     @Override
-    public PigmentStack readFromNBT(CompoundTag nbt) {
-        return PigmentStack.readFromNBT(nbt);
+    public PigmentStack readFromNBT(CompoundTag nbt, HolderLookup.Provider registries) {
+        return PigmentStack.parseOptional(registries, nbt);
     }
 
     public static class Template extends ChemicalMachineComponent.Template<Pigment, PigmentStack, PigmentMachineComponent> {

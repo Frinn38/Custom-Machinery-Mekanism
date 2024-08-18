@@ -4,12 +4,12 @@ import fr.frinn.custommachinery.api.codec.NamedCodec;
 import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.crafting.CraftingResult;
 import fr.frinn.custommachinery.api.crafting.ICraftingContext;
+import fr.frinn.custommachinery.api.crafting.IRequirementList;
 import fr.frinn.custommachinery.api.integration.jei.IDisplayInfo;
-import fr.frinn.custommachinery.api.integration.jei.IDisplayInfoRequirement;
-import fr.frinn.custommachinery.api.requirement.ITickableRequirement;
+import fr.frinn.custommachinery.api.requirement.IRequirement;
+import fr.frinn.custommachinery.api.requirement.RecipeRequirement;
 import fr.frinn.custommachinery.api.requirement.RequirementIOMode;
 import fr.frinn.custommachinery.api.requirement.RequirementType;
-import fr.frinn.custommachinery.impl.requirement.AbstractChanceableRequirement;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.RadiationMachineComponent;
 import mekanism.common.config.MekanismConfig;
@@ -19,26 +19,22 @@ import mekanism.common.util.UnitDisplayUtils;
 import mekanism.common.util.UnitDisplayUtils.RadiationUnit;
 import net.minecraft.network.chat.Component;
 
-public class RadiationPerTickRequirement extends AbstractChanceableRequirement<RadiationMachineComponent> implements ITickableRequirement<RadiationMachineComponent>, IDisplayInfoRequirement {
+public class RadiationPerTickRequirement implements IRequirement<RadiationMachineComponent> {
 
     public static final NamedCodec<RadiationPerTickRequirement> CODEC = NamedCodec.record(radiationRequirementInstance ->
             radiationRequirementInstance.group(
                     RequirementIOMode.CODEC.fieldOf("mode").forGetter(RadiationPerTickRequirement::getMode),
                     NamedCodec.doubleRange(0.0D, Double.MAX_VALUE).fieldOf("amount").forGetter(requirement -> requirement.amount),
-                    NamedCodec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("range", () -> MekanismConfig.general.radiationChunkCheckRadius.get() * 16).forGetter(requirement -> requirement.radius),
-                    NamedCodec.doubleRange(0.0D, 1.0D).optionalFieldOf("chance", 1.0D).forGetter(RadiationPerTickRequirement::getChance)
-            ).apply(radiationRequirementInstance, (mode, amount, radius, chance) -> {
-                RadiationPerTickRequirement requirement = new RadiationPerTickRequirement(mode, amount, radius);
-                requirement.setChance(chance);
-                return requirement;
-            }), "Radiation per tick requirement"
+                    NamedCodec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("range", () -> MekanismConfig.general.radiationChunkCheckRadius.get() * 16).forGetter(requirement -> requirement.radius)
+            ).apply(radiationRequirementInstance, RadiationPerTickRequirement::new), "Radiation per tick requirement"
     );
 
+    private final RequirementIOMode mode;
     private final double amount;
     private final int radius;
 
     public RadiationPerTickRequirement(RequirementIOMode mode, double amount, int radius) {
-        super(mode);
+        this.mode = mode;
         this.amount = amount;
         this.radius = radius;
     }
@@ -54,6 +50,11 @@ public class RadiationPerTickRequirement extends AbstractChanceableRequirement<R
     }
 
     @Override
+    public RequirementIOMode getMode() {
+        return this.mode;
+    }
+
+    @Override
     public boolean test(RadiationMachineComponent component, ICraftingContext context) {
         if(getMode() == RequirementIOMode.INPUT)
             return component.getRadiations() >= this.amount;
@@ -61,17 +62,11 @@ public class RadiationPerTickRequirement extends AbstractChanceableRequirement<R
     }
 
     @Override
-    public CraftingResult processStart(RadiationMachineComponent component, ICraftingContext context) {
-        return CraftingResult.pass();
+    public void gatherRequirements(IRequirementList<RadiationMachineComponent> list) {
+        list.processEachTick(this::processTick);
     }
 
-    @Override
-    public CraftingResult processEnd(RadiationMachineComponent component, ICraftingContext context) {
-        return CraftingResult.pass();
-    }
-
-    @Override
-    public CraftingResult processTick(RadiationMachineComponent component, ICraftingContext context) {
+    private CraftingResult processTick(RadiationMachineComponent component, ICraftingContext context) {
         if(getMode() == RequirementIOMode.INPUT) {
             double radiations = component.getRadiations();
             if(radiations < this.amount)
@@ -84,7 +79,7 @@ public class RadiationPerTickRequirement extends AbstractChanceableRequirement<R
     }
 
     @Override
-    public void getDisplayInfo(IDisplayInfo info) {
+    public void getDefaultDisplayInfo(IDisplayInfo info, RecipeRequirement<?, ?> requirement) {
         if(getMode() == RequirementIOMode.INPUT) {
             info.setItemIcon(MekanismItems.GEIGER_COUNTER.asItem());
             info.addTooltip(Component.translatable("custommachinerymekanism.requirements.radiation.info.tick.input", sievert(this.amount), this.radius));

@@ -21,7 +21,7 @@ public class InfusionRequirementCT {
 
     @Method
     public static CustomMachineRecipeCTBuilder requireInfusion(CustomMachineRecipeCTBuilder builder, ICrTInfusionStack stack, String tank) {
-        return builder.addRequirement(new InfusionRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new InfusionRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -31,7 +31,7 @@ public class InfusionRequirementCT {
 
     @Method
     public static CustomMachineRecipeCTBuilder requireInfusionPerTick(CustomMachineRecipeCTBuilder builder, ICrTInfusionStack stack, String tank) {
-        return builder.addRequirement(new InfusionPerTickRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new InfusionPerTickRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -41,7 +41,7 @@ public class InfusionRequirementCT {
 
     @Method
     public static CustomMachineRecipeCTBuilder produceInfusion(CustomMachineRecipeCTBuilder builder, ICrTInfusionStack stack, String tank) {
-        return builder.addRequirement(new InfusionRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new InfusionRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -51,6 +51,6 @@ public class InfusionRequirementCT {
 
     @Method
     public static CustomMachineRecipeCTBuilder produceInfusionPerTick(CustomMachineRecipeCTBuilder builder, ICrTInfusionStack stack, String tank) {
-        return builder.addRequirement(new InfusionPerTickRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new InfusionPerTickRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 }

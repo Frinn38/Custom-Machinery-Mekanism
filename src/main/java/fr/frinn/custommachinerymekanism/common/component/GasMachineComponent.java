@@ -10,6 +10,7 @@ import fr.frinn.custommachinerymekanism.common.utils.Codecs;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
@@ -36,8 +37,8 @@ public class GasMachineComponent extends ChemicalMachineComponent<Gas, GasStack>
     }
 
     @Override
-    public GasStack readFromNBT(CompoundTag nbt) {
-        return GasStack.readFromNBT(nbt);
+    public GasStack readFromNBT(CompoundTag nbt, HolderLookup.Provider registries) {
+        return GasStack.parseOptional(registries, nbt);
     }
 
     public static class Template extends ChemicalMachineComponent.Template<Gas, GasStack, GasMachineComponent> {

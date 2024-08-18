@@ -13,7 +13,7 @@ public interface SlurryRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder requireSlurry(SlurryStack stack, String tank) {
-        return addRequirement(new SlurryRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new SlurryRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder requireSlurryPerTick(SlurryStack stack) {
@@ -21,7 +21,7 @@ public interface SlurryRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder requireSlurryPerTick(SlurryStack stack, String tank) {
-        return addRequirement(new SlurryPerTickRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new SlurryPerTickRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder produceSlurry(SlurryStack stack) {
@@ -29,7 +29,7 @@ public interface SlurryRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder produceSlurry(SlurryStack stack, String tank) {
-        return addRequirement(new SlurryRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new SlurryRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder produceSlurryPerTick(SlurryStack stack) {
@@ -37,6 +37,6 @@ public interface SlurryRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder produceSlurryPerTick(SlurryStack stack, String tank) {
-        return addRequirement(new SlurryPerTickRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new SlurryPerTickRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 }

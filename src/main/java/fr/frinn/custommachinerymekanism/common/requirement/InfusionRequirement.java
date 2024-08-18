@@ -4,6 +4,7 @@ import fr.frinn.custommachinery.api.codec.NamedCodec;
 import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.crafting.IMachineRecipe;
 import fr.frinn.custommachinery.api.integration.jei.IJEIIngredientWrapper;
+import fr.frinn.custommachinery.api.requirement.RecipeRequirement;
 import fr.frinn.custommachinery.api.requirement.RequirementIOMode;
 import fr.frinn.custommachinery.api.requirement.RequirementType;
 import fr.frinn.custommachinerymekanism.Registration;
@@ -36,7 +37,7 @@ public class InfusionRequirement extends ChemicalRequirement<InfuseType, Infusio
     }
 
     @Override
-    public List<IJEIIngredientWrapper<InfusionStack>> getJEIIngredientWrappers(IMachineRecipe recipe) {
-        return Collections.singletonList(new InfusionIngredientWrapper(this.getMode(), this.chemical, this.amount, this.getChance(), false, this.tank));
+    public List<IJEIIngredientWrapper<InfusionStack>> getJEIIngredientWrappers(IMachineRecipe recipe, RecipeRequirement<?, ?> requirement) {
+        return Collections.singletonList(new InfusionIngredientWrapper(this.getMode(), this.chemical, this.amount, requirement.chance(), false, this.tank));
     }
 }

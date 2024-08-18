@@ -1,6 +1,5 @@
 package fr.frinn.custommachinerymekanism.client.render.element;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import fr.frinn.custommachinery.api.guielement.IMachineScreen;
 import fr.frinn.custommachinery.impl.guielement.TexturedGuiElementWidget;
 import fr.frinn.custommachinerymekanism.Registration;
@@ -12,7 +11,7 @@ import mekanism.common.config.MekanismConfig;
 import mekanism.common.util.MekanismUtils;
 import mekanism.common.util.UnitDisplayUtils;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
@@ -29,15 +28,15 @@ public class HeatGuiElementWidget extends TexturedGuiElementWidget<HeatGuiElemen
     }
 
     @Override
-    public void renderButton(PoseStack pose, int mouseX, int mouseY, float partialTicks) {
-        super.renderButton(pose, mouseX, mouseY, partialTicks);
+    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+        super.renderWidget(graphics, mouseX, mouseY, partialTicks);
         this.getScreen().getTile().getComponentManager().getComponent(Registration.HEAT_MACHINE_COMPONENT.get()).ifPresent(component -> {
             double fillPercent = component.getHeatFillPercent();
             int barHeight = Mth.clamp((int)(fillPercent * (double)this.height), 1, this.height - 1);
-            GuiComponent.fill(pose, this.x + 1, this.y + this.height - barHeight, this.x + this.width - 1, this.y + this.height - 1, FastColor.ARGB32.color(200, 255, 128, 0));
+            graphics.fill(this.getX() + 1, this.getY() + this.height - barHeight, this.getX() + this.width - 1, this.getY() + this.height - 1, FastColor.ARGB32.color(200, 255, 128, 0));
         });
         if (this.isHoveredOrFocused() && this.getElement().highlight())
-            ClientHandler.renderSlotHighlight(pose, this.x + 1, this.y + 1, this.width - 2, this.height - 2);
+            ClientHandler.renderSlotHighlight(graphics, this.getX() + 1, this.getY() + 1, this.width - 2, this.height - 2);
     }
 
     @Override

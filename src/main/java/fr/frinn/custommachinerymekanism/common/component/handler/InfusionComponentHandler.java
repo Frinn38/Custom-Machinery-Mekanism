@@ -10,7 +10,7 @@ import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.infuse.InfusionStack;
 import mekanism.common.capabilities.Capabilities;
 import net.minecraft.core.Direction;
-import net.minecraftforge.common.capabilities.Capability;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,8 +22,8 @@ public class InfusionComponentHandler extends ChemicalComponentHandler<InfuseTyp
     }
 
     @Override
-    public Capability<IInfusionHandler> targetCap() {
-        return Capabilities.INFUSION_HANDLER;
+    public BlockCapability<IInfusionHandler, Direction> targetCap() {
+        return Capabilities.INFUSION.block();
     }
 
     @Override

@@ -10,6 +10,7 @@ import fr.frinn.custommachinerymekanism.common.utils.Codecs;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.infuse.InfusionStack;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
@@ -36,8 +37,8 @@ public class InfusionMachineComponent extends ChemicalMachineComponent<InfuseTyp
     }
 
     @Override
-    public InfusionStack readFromNBT(CompoundTag nbt) {
-        return InfusionStack.readFromNBT(nbt);
+    public InfusionStack readFromNBT(CompoundTag nbt, HolderLookup.Provider registries) {
+        return InfusionStack.parseOptional(registries, nbt);
     }
 
     public static class Template extends ChemicalMachineComponent.Template<InfuseType, InfusionStack, InfusionMachineComponent> {

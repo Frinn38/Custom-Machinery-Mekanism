@@ -21,7 +21,7 @@ public class GasRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder requireGas(CustomCraftRecipeCTBuilder builder, ICrTGasStack stack, String tank) {
-        return builder.addRequirement(new GasRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new GasRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -31,7 +31,7 @@ public class GasRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder requireGasPerTick(CustomCraftRecipeCTBuilder builder, ICrTGasStack stack, String tank) {
-        return builder.addRequirement(new GasPerTickRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new GasPerTickRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -41,7 +41,7 @@ public class GasRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder produceGas(CustomCraftRecipeCTBuilder builder, ICrTGasStack stack, String tank) {
-        return builder.addRequirement(new GasRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new GasRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -51,6 +51,6 @@ public class GasRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder produceGasPerTick(CustomCraftRecipeCTBuilder builder, ICrTGasStack stack, String tank) {
-        return builder.addRequirement(new GasPerTickRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new GasPerTickRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 }

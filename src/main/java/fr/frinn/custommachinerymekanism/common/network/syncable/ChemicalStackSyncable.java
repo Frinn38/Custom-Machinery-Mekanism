@@ -31,7 +31,7 @@ public abstract class ChemicalStackSyncable<C extends Chemical<C>, S extends Che
         else if(stack instanceof PigmentStack pigment)
             return (D) new PigmentStackData(i, pigment);
         else
-            throw new IllegalStateException("Can't get data for object: " + stack.getType().getClass().getSimpleName());
+            throw new IllegalStateException("Can't get data for object: " + stack.getChemical().getClass().getSimpleName());
     }
 
     @Override
@@ -39,8 +39,9 @@ public abstract class ChemicalStackSyncable<C extends Chemical<C>, S extends Che
         ChemicalStack<C> value = get();
         boolean needSync;
         if(this.lastKnownValue != null)
-            needSync = !value.isStackIdentical(this.lastKnownValue);
-        else needSync = true;
+            needSync = !value.equals(this.lastKnownValue);
+        else
+            needSync = true;
         this.lastKnownValue = (S) value.copy();
         return needSync;
     }

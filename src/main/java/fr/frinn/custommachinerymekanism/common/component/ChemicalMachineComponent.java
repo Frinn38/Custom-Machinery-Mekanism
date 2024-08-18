@@ -17,7 +17,9 @@ import fr.frinn.custommachinerymekanism.common.network.syncable.ChemicalStackSyn
 import mekanism.api.Action;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 
 import java.util.Collections;
 import java.util.List;
@@ -53,10 +55,10 @@ public abstract class ChemicalMachineComponent<C extends Chemical<C>, S extends 
 
     public abstract S createStack(C type, long amount);
 
-    public abstract S readFromNBT(CompoundTag nbt);
+    public abstract S readFromNBT(CompoundTag nbt, HolderLookup.Provider registries);
 
     public S createStack(S stack, long amount) {
-        return createStack(stack.getType(), amount);
+        return createStack(stack.getChemical(), amount);
     }
 
     public String getId() {
@@ -82,15 +84,15 @@ public abstract class ChemicalMachineComponent<C extends Chemical<C>, S extends 
                 .getComponentHandler(getType())
                 .stream()
                 .flatMap(handler -> handler.getComponents().stream())
-                .anyMatch(component -> component != this && component instanceof ChemicalMachineComponent<?, ?> chemical && stack.getType() == chemical.stack.getType()))
+                .anyMatch(component -> component != this && component instanceof ChemicalMachineComponent<?, ?> chemical && stack.getChemical() == chemical.stack.getChemical()))
             return false;
 
         //Check filter
-        if(this.filter.stream().anyMatch(gas -> gas == stack.getType()) != this.whitelist)
+        if(this.filter.stream().anyMatch(gas -> gas == stack.getChemical()) != this.whitelist)
             return false;
 
         //Check if same chemical
-        return this.stack.isEmpty() || this.stack.isTypeEqual(stack);
+        return this.stack.isEmpty() || this.stack.is(stack.getChemical());
     }
 
     //Return the remaining that was not inserted
@@ -98,7 +100,7 @@ public abstract class ChemicalMachineComponent<C extends Chemical<C>, S extends 
         if(!isValid(stack))
             return stack;
 
-        if(!this.stack.isEmpty() && this.stack.getType() != stack.getType())
+        if(!this.stack.isEmpty() && this.stack.getChemical() != stack.getChemical())
             return stack;
 
         long maxInsert = this.stack.isEmpty() ? Math.min(this.capacity, stack.getAmount()) : Math.min(this.capacity - this.stack.getAmount(), stack.getAmount());
@@ -117,7 +119,7 @@ public abstract class ChemicalMachineComponent<C extends Chemical<C>, S extends 
         long maxExtract = Math.min(this.stack.getAmount(), amount);
         if(!byPassLimit)
             maxExtract = Math.min(maxExtract, this.maxOutput);
-        C type = this.stack.getType();
+        C type = this.stack.getChemical();
         if(action.execute()) {
             this.stack.shrink(maxExtract);
             getManager().markDirty();
@@ -131,18 +133,18 @@ public abstract class ChemicalMachineComponent<C extends Chemical<C>, S extends 
     }
 
     @Override
-    public void serialize(CompoundTag nbt) {
+    public void serialize(CompoundTag nbt, HolderLookup.Provider registries) {
         if(!this.stack.isEmpty())
-            nbt.put("stack", this.stack.write(new CompoundTag()));
+            nbt.put("stack", this.stack.save(registries));
         nbt.put("config", this.config.serialize());
     }
 
     @Override
-    public void deserialize(CompoundTag nbt) {
+    public void deserialize(CompoundTag nbt, HolderLookup.Provider registries) {
         if(nbt.contains("stack"))
-            this.stack = readFromNBT(nbt.getCompound("stack"));
-        if(nbt.contains("config"))
-            this.config.deserialize(nbt.get("config"));
+            this.stack = readFromNBT(nbt.getCompound("stack"), registries);
+        if(nbt.contains("config", Tag.TAG_COMPOUND))
+            this.config.deserialize(nbt.getCompound("config"));
     }
 
     @Override
@@ -210,11 +212,11 @@ public abstract class ChemicalMachineComponent<C extends Chemical<C>, S extends 
             if(this.mode != ComponentIOMode.BOTH && isInput != this.mode.isInput())
                 return false;
             if(ingredient instanceof ChemicalStack<?> stack && isSameType(stack)) {
-                return this.filter.stream().anyMatch(g -> g == stack.getType()) == this.whitelist;
+                return this.filter.stream().anyMatch(g -> g == stack.getChemical()) == this.whitelist;
             } else if(ingredient instanceof List<?> list) {
                 return list.stream().allMatch(object -> {
                     if(object instanceof ChemicalStack<?> stack && isSameType(stack))
-                        return this.filter.stream().anyMatch(g -> g == stack.getType()) == this.whitelist;
+                        return this.filter.stream().anyMatch(g -> g == stack.getChemical()) == this.whitelist;
                     return false;
                 });
             }

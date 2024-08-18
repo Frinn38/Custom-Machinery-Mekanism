@@ -10,7 +10,7 @@ import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.common.capabilities.Capabilities;
 import net.minecraft.core.Direction;
-import net.minecraftforge.common.capabilities.Capability;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,8 +22,8 @@ public class SlurryComponentHandler extends ChemicalComponentHandler<Slurry, Slu
     }
 
     @Override
-    public Capability<ISlurryHandler> targetCap() {
-        return Capabilities.SLURRY_HANDLER;
+    public BlockCapability<ISlurryHandler, Direction> targetCap() {
+        return Capabilities.SLURRY.block();
     }
 
     @Override

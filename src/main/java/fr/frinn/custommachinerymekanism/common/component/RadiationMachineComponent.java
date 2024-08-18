@@ -7,9 +7,9 @@ import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.impl.component.AbstractMachineComponent;
 import fr.frinn.custommachinerymekanism.Registration;
 import mekanism.api.Chunk3D;
-import mekanism.api.Coord4D;
-import mekanism.api.MekanismAPI;
+import mekanism.api.radiation.IRadiationManager;
 import mekanism.api.radiation.IRadiationSource;
+import net.minecraft.core.GlobalPos;
 
 import java.util.Map;
 import java.util.Set;
@@ -17,23 +17,23 @@ import java.util.function.Supplier;
 
 public class RadiationMachineComponent extends AbstractMachineComponent {
 
-    private final Supplier<Coord4D> coords;
+    private final Supplier<GlobalPos> coords;
 
     public RadiationMachineComponent(IMachineComponentManager manager) {
         super(manager, ComponentIOMode.NONE);
-        this.coords = Suppliers.memoize(() -> new Coord4D(manager.getTile()));
+        this.coords = Suppliers.memoize(() -> new GlobalPos(manager.getTile().getLevel().dimension(), manager.getTile().getBlockPos()));
     }
 
     public double getRadiations() {
-        return MekanismAPI.getRadiationManager().getRadiationLevel(this.coords.get());
+        return IRadiationManager.INSTANCE.getRadiationLevel(this.coords.get());
     }
 
     public void removeRadiations(double amount, int radius) {
         Set<Chunk3D> checkChunks = new Chunk3D(this.coords.get()).expand((int)Math.ceil(radius / 16.0D));
 
         for (Chunk3D chunk : checkChunks) {
-            for (Map.Entry<Coord4D, IRadiationSource> entry : MekanismAPI.getRadiationManager().getRadiationSources().row(chunk).entrySet()) {
-                if(entry.getKey().distanceTo(this.coords.get()) <= radius) {
+            for (Map.Entry<GlobalPos, IRadiationSource> entry : IRadiationManager.INSTANCE.getRadiationSources().row(chunk).entrySet()) {
+                if(entry.getKey().pos().distSqr(this.coords.get().pos()) <= radius * radius) {
                     IRadiationSource source = entry.getValue();
                     double toRemove = Math.min(source.getMagnitude(), amount);
                     source.radiate(-toRemove);
@@ -46,7 +46,7 @@ public class RadiationMachineComponent extends AbstractMachineComponent {
     }
 
     public void addRadiations(double amount) {
-        MekanismAPI.getRadiationManager().radiate(this.coords.get(), amount);
+        IRadiationManager.INSTANCE.radiate(this.coords.get(), amount);
     }
 
     @Override

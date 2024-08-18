@@ -1,11 +1,14 @@
 package fr.frinn.custommachinerymekanism.common.integration.kubejs;
 
-import dev.latvian.mods.kubejs.KubeJSPlugin;
-import dev.latvian.mods.kubejs.recipe.RecipeExceptionJS;
-import dev.latvian.mods.kubejs.script.ScriptType;
+import com.mojang.serialization.Codec;
+import dev.latvian.mods.kubejs.error.KubeRuntimeException;
+import dev.latvian.mods.kubejs.plugin.KubeJSPlugin;
+import dev.latvian.mods.kubejs.script.TypeWrapperRegistry;
+import dev.latvian.mods.kubejs.script.TypeWrapperRegistry.ContextFromFunction;
 import dev.latvian.mods.rhino.Wrapper;
-import dev.latvian.mods.rhino.util.EnumTypeWrapper;
-import dev.latvian.mods.rhino.util.wrap.TypeWrappers;
+import dev.latvian.mods.rhino.type.TypeInfo;
+import dev.latvian.mods.rhino.util.wrap.TypeWrapperFactory;
+import fr.frinn.custommachinery.api.codec.NamedCodec;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -19,15 +22,17 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public class CustomMachineryMekanismKubeJSPlugin extends KubeJSPlugin {
+public class CustomMachineryMekanismKubeJSPlugin implements KubeJSPlugin {
+
+    private static final Codec<TemperatureUnit> TEMPERATURE_UNIT_CODEC = NamedCodec.enumCodec(TemperatureUnit.class).codec();
 
     @Override
-    public void registerTypeWrappers(ScriptType type, TypeWrappers typeWrappers) {
-        typeWrappers.register(GasStack.class, (ctx, o) -> of(o, MekanismAPI.EMPTY_GAS, GasStack.EMPTY, MekanismAPI.gasRegistry()::getValue, GasStack::new));
-        typeWrappers.register(InfusionStack.class, (ctx, o) -> of(o, MekanismAPI.EMPTY_INFUSE_TYPE, InfusionStack.EMPTY, MekanismAPI.infuseTypeRegistry()::getValue, InfusionStack::new));
-        typeWrappers.register(PigmentStack.class, (ctx, o) -> of(o, MekanismAPI.EMPTY_PIGMENT, PigmentStack.EMPTY, MekanismAPI.pigmentRegistry()::getValue, PigmentStack::new));
-        typeWrappers.register(SlurryStack.class, (ctx, o) -> of(o, MekanismAPI.EMPTY_SLURRY, SlurryStack.EMPTY, MekanismAPI.slurryRegistry()::getValue, SlurryStack::new));
-        typeWrappers.register(TemperatureUnit.class, EnumTypeWrapper.get(TemperatureUnit.class));
+    public void registerTypeWrappers(final TypeWrapperRegistry registry) {
+        registry.register(GasStack.class, (ContextFromFunction<GasStack>) (ctx, o) -> of(o, MekanismAPI.EMPTY_GAS, GasStack.EMPTY, MekanismAPI.GAS_REGISTRY::get, GasStack::new));
+        registry.register(InfusionStack.class, (ContextFromFunction<InfusionStack>) (ctx, o) -> of(o, MekanismAPI.EMPTY_INFUSE_TYPE, InfusionStack.EMPTY, MekanismAPI.INFUSE_TYPE_REGISTRY::get, InfusionStack::new));
+        registry.register(PigmentStack.class, (ContextFromFunction<PigmentStack>) (ctx, o) -> of(o, MekanismAPI.EMPTY_PIGMENT, PigmentStack.EMPTY, MekanismAPI.PIGMENT_REGISTRY::get, PigmentStack::new));
+        registry.register(SlurryStack.class, (ContextFromFunction<SlurryStack>) (ctx, o) -> of(o, MekanismAPI.EMPTY_SLURRY, SlurryStack.EMPTY, MekanismAPI.SLURRY_REGISTRY::get, SlurryStack::new));
+        registry.register(TemperatureUnit.class, (TypeWrapperFactory<TemperatureUnit>) TypeInfo.of(TemperatureUnit.class));
     }
 
     @SuppressWarnings("unchecked")
@@ -46,7 +51,7 @@ public class CustomMachineryMekanismKubeJSPlugin extends KubeJSPlugin {
         } else if(o instanceof ResourceLocation loc) {
             C chemical = getter.apply(loc);
             if(chemical == air)
-                throw new RecipeExceptionJS("Chemical " + loc + " not found!");
+                throw new KubeRuntimeException("Chemical " + loc + " not found!");
             return maker.apply(chemical, BASE_AMOUNT);
         } else if (o instanceof CharSequence) {
             String s = o.toString().trim();
@@ -60,9 +65,9 @@ public class CustomMachineryMekanismKubeJSPlugin extends KubeJSPlugin {
             if(s1.length == 2)
                 amount = Long.parseLong(s1[1]);
 
-            C chemical = getter.apply(new ResourceLocation(s1[0]));
+            C chemical = getter.apply(ResourceLocation.parse(s1[0]));
             if(chemical == air)
-                throw new RecipeExceptionJS("Chemical " + s1[0] + " not found!");
+                throw new KubeRuntimeException("Chemical " + s1[0] + " not found!");
             return maker.apply(chemical, amount);
         }
 

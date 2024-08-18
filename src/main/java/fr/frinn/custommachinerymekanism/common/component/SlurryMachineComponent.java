@@ -10,6 +10,7 @@ import fr.frinn.custommachinerymekanism.common.utils.Codecs;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
@@ -36,8 +37,8 @@ public class SlurryMachineComponent extends ChemicalMachineComponent<Slurry, Slu
     }
 
     @Override
-    public SlurryStack readFromNBT(CompoundTag nbt) {
-        return SlurryStack.readFromNBT(nbt);
+    public SlurryStack readFromNBT(CompoundTag nbt, HolderLookup.Provider registries) {
+        return SlurryStack.parseOptional(registries, nbt);
     }
 
     public static class Template extends ChemicalMachineComponent.Template<Slurry, SlurryStack, SlurryMachineComponent> {

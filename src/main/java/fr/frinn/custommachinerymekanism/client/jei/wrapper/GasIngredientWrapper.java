@@ -3,7 +3,7 @@ package fr.frinn.custommachinerymekanism.client.jei.wrapper;
 import fr.frinn.custommachinery.api.requirement.RequirementIOMode;
 import mekanism.api.chemical.gas.Gas;
 import mekanism.api.chemical.gas.GasStack;
-import mekanism.client.jei.MekanismJEI;
+import mekanism.client.recipe_viewer.jei.MekanismJEI;
 
 public class GasIngredientWrapper extends ChemicalIngredientWrapper<Gas, GasStack> {
 

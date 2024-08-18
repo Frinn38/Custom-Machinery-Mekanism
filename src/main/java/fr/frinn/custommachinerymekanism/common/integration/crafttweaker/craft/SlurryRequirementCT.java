@@ -21,7 +21,7 @@ public class SlurryRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder requireSlurry(CustomCraftRecipeCTBuilder builder, ICrTSlurryStack stack, String tank) {
-        return builder.addRequirement(new SlurryRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new SlurryRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -31,7 +31,7 @@ public class SlurryRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder requireSlurryPerTick(CustomCraftRecipeCTBuilder builder, ICrTSlurryStack stack, String tank) {
-        return builder.addRequirement(new SlurryPerTickRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new SlurryPerTickRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -41,7 +41,7 @@ public class SlurryRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder produceSlurry(CustomCraftRecipeCTBuilder builder, ICrTSlurryStack stack, String tank) {
-        return builder.addRequirement(new SlurryRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new SlurryRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -51,6 +51,6 @@ public class SlurryRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder produceSlurryPerTick(CustomCraftRecipeCTBuilder builder, ICrTSlurryStack stack, String tank) {
-        return builder.addRequirement(new SlurryPerTickRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new SlurryPerTickRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 }

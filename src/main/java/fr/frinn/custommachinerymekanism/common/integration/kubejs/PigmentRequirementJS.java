@@ -13,7 +13,7 @@ public interface PigmentRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder requirePigment(PigmentStack stack, String tank) {
-        return addRequirement(new PigmentRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new PigmentRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder requirePigmentPerTick(PigmentStack stack) {
@@ -21,7 +21,7 @@ public interface PigmentRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder requirePigmentPerTick(PigmentStack stack, String tank) {
-        return addRequirement(new PigmentPerTickRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new PigmentPerTickRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder producePigment(PigmentStack stack) {
@@ -29,7 +29,7 @@ public interface PigmentRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder producePigment(PigmentStack stack, String tank) {
-        return addRequirement(new PigmentRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new PigmentRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder producePigmentPerTick(PigmentStack stack) {
@@ -37,6 +37,6 @@ public interface PigmentRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder producePigmentPerTick(PigmentStack stack, String tank) {
-        return addRequirement(new PigmentPerTickRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new PigmentPerTickRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 }

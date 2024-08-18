@@ -4,39 +4,35 @@ import com.mojang.datafixers.util.Function4;
 import fr.frinn.custommachinery.api.codec.NamedCodec;
 import fr.frinn.custommachinery.api.crafting.CraftingResult;
 import fr.frinn.custommachinery.api.crafting.ICraftingContext;
+import fr.frinn.custommachinery.api.crafting.IRequirementList;
 import fr.frinn.custommachinery.api.integration.jei.IJEIIngredientRequirement;
+import fr.frinn.custommachinery.api.requirement.IRequirement;
 import fr.frinn.custommachinery.api.requirement.RequirementIOMode;
-import fr.frinn.custommachinery.impl.requirement.AbstractChanceableRequirement;
-import fr.frinn.custommachinery.impl.requirement.AbstractRequirement;
 import fr.frinn.custommachinerymekanism.common.component.handler.ChemicalComponentHandler;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.network.chat.Component;
 
-public abstract class ChemicalRequirement<C extends Chemical<C>, S extends ChemicalStack<C>, T extends ChemicalComponentHandler<C, S, ?, ?>> extends AbstractChanceableRequirement<T> implements IJEIIngredientRequirement<S> {
+public abstract class ChemicalRequirement<C extends Chemical<C>, S extends ChemicalStack<C>, T extends ChemicalComponentHandler<C, S, ?, ?>> implements IRequirement<T>, IJEIIngredientRequirement<S> {
 
     public static <C extends Chemical<C>, S extends ChemicalStack<C>, T extends ChemicalComponentHandler<C, S, ?, ?>, R extends ChemicalRequirement<C, S, T>> NamedCodec<R> makeCodec(NamedCodec<C> chemicalCodec, Function4<RequirementIOMode, C, Long, String, R> builder, String name) {
         return NamedCodec.record(fluidRequirementInstance ->
                 fluidRequirementInstance.group(
-                        RequirementIOMode.CODEC.fieldOf("mode").forGetter(AbstractRequirement::getMode),
+                        RequirementIOMode.CODEC.fieldOf("mode").forGetter(requirement -> requirement.mode),
                         chemicalCodec.fieldOf("chemical").forGetter(requirement -> requirement.chemical),
                         NamedCodec.LONG.fieldOf("amount").forGetter(requirement -> requirement.amount),
-                        NamedCodec.doubleRange(0.0, 1.0).optionalFieldOf("chance", 1.0D).forGetter(AbstractChanceableRequirement::getChance),
                         NamedCodec.STRING.optionalFieldOf("tank", "").forGetter(requirement -> requirement.tank)
-                ).apply(fluidRequirementInstance, (mode, gas, amount, chance, tank) -> {
-                        R requirement = builder.apply(mode, gas, amount, tank);
-                        requirement.setChance(chance);
-                        return requirement;
-                }), name
+                ).apply(fluidRequirementInstance, builder), name
         );
     }
 
+    final RequirementIOMode mode;
     final C chemical;
     final long amount;
     final String tank;
 
     public ChemicalRequirement(RequirementIOMode mode, C chemical, long amount, String tank) {
-        super(mode);
+        this.mode = mode;
         this.chemical = chemical;
         this.amount = amount;
         this.tank = tank;
@@ -52,10 +48,19 @@ public abstract class ChemicalRequirement<C extends Chemical<C>, S extends Chemi
     }
 
     @Override
-    public CraftingResult processStart(T handler, ICraftingContext context) {
-        if(this.getMode() != RequirementIOMode.INPUT)
-            return CraftingResult.pass();
+    public RequirementIOMode getMode() {
+        return this.mode;
+    }
 
+    @Override
+    public void gatherRequirements(IRequirementList<T> list) {
+        if(this.mode == RequirementIOMode.INPUT)
+            list.processOnStart(this::processInput);
+        else
+            list.processOnEnd(this::processOutput);
+    }
+
+    CraftingResult processInput(T handler, ICraftingContext context) {
         long amount = (long)context.getModifiedValue(this.amount, this, null);
         if(!test(handler, context))
             return CraftingResult.error(Component.translatable("custommachinerymekanism.requirements.chemical.error.input", Component.translatable(this.chemical.getTranslationKey()), amount));
@@ -64,11 +69,7 @@ public abstract class ChemicalRequirement<C extends Chemical<C>, S extends Chemi
         return CraftingResult.success();
     }
 
-    @Override
-    public CraftingResult processEnd(T handler, ICraftingContext context) {
-        if(this.getMode() != RequirementIOMode.OUTPUT)
-            return CraftingResult.pass();
-
+    CraftingResult processOutput(T handler, ICraftingContext context) {
         long amount = (long)context.getModifiedValue(this.amount, this, null);
         if(!test(handler, context))
             return CraftingResult.error(Component.translatable("custommachinerymekanism.requirements.chemical.error.output", amount, Component.translatable(this.chemical.getTranslationKey())));

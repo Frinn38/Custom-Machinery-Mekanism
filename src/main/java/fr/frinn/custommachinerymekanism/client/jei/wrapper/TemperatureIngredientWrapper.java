@@ -36,10 +36,9 @@ public class TemperatureIngredientWrapper implements IJEIIngredientWrapper<Heat>
         builder.addSlot(RecipeIngredientRole.INPUT, element.getX() - xOffset, element.getY() - yOffset)
                 .setCustomRenderer(CMMJeiPlugin.HEAT_INGREDIENT, new HeatJEIIngredientRenderer(heatElement))
                 .addIngredient(CMMJeiPlugin.HEAT_INGREDIENT, this.ingredient)
-                .addTooltipCallback((view, tooltips) -> {
-                    tooltips.clear();
+                .addRichTooltipCallback((view, tooltips) -> {
                     tooltips.add(Component.translatable("custommachinerymekanism.requirements.temp.error", this.temp.toFormattedString()));
-                    tooltips.add(MekanismLang.UNIT.translate(this.unit.getLabel().translate()));
+                    tooltips.add(MekanismLang.UNIT.translate(this.unit.getLabel(true).translate()));
                 });
         return true;
     }

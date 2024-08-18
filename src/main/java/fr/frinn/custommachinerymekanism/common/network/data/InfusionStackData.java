@@ -4,7 +4,8 @@ import fr.frinn.custommachinery.api.network.DataType;
 import fr.frinn.custommachinerymekanism.Registration;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.infuse.InfusionStack;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 public class InfusionStackData extends ChemicalStackData<InfuseType, InfusionStack> {
 
@@ -12,8 +13,13 @@ public class InfusionStackData extends ChemicalStackData<InfuseType, InfusionSta
         super(id, value);
     }
 
-    public InfusionStackData(short id, FriendlyByteBuf buf) {
-        super(id, InfusionStack.readFromPacket(buf));
+    public InfusionStackData(short id, RegistryFriendlyByteBuf buf) {
+        super(id, InfusionStack.OPTIONAL_STREAM_CODEC.decode(buf));
+    }
+
+    @Override
+    public StreamCodec<RegistryFriendlyByteBuf, InfusionStack> codec() {
+        return InfusionStack.OPTIONAL_STREAM_CODEC;
     }
 
     @Override

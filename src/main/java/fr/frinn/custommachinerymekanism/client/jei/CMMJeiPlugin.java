@@ -4,7 +4,6 @@ import fr.frinn.custommachinery.client.integration.jei.DummyIngredientRenderer;
 import fr.frinn.custommachinerymekanism.CustomMachineryMekanism;
 import fr.frinn.custommachinerymekanism.client.jei.heat.Heat;
 import fr.frinn.custommachinerymekanism.client.jei.heat.HeatIngredientHelper;
-import fr.frinn.custommachinerymekanism.client.jei.heat.HeatJEIIngredientRenderer;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.ingredients.IIngredientType;
@@ -16,7 +15,7 @@ import java.util.Collections;
 @JeiPlugin
 public class CMMJeiPlugin implements IModPlugin {
 
-    public static final ResourceLocation PLUGIN_ID = new ResourceLocation(CustomMachineryMekanism.MODID, "jei_plugin");
+    public static final ResourceLocation PLUGIN_ID = CustomMachineryMekanism.rl("jei_plugin");
     public static final IIngredientType<Heat> HEAT_INGREDIENT = () -> Heat.class;
 
     @Override

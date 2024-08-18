@@ -5,12 +5,13 @@ import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.crafting.CraftingResult;
 import fr.frinn.custommachinery.api.crafting.ICraftingContext;
 import fr.frinn.custommachinery.api.crafting.IMachineRecipe;
+import fr.frinn.custommachinery.api.crafting.IRequirementList;
 import fr.frinn.custommachinery.api.integration.jei.IJEIIngredientRequirement;
 import fr.frinn.custommachinery.api.integration.jei.IJEIIngredientWrapper;
-import fr.frinn.custommachinery.api.requirement.ITickableRequirement;
+import fr.frinn.custommachinery.api.requirement.IRequirement;
+import fr.frinn.custommachinery.api.requirement.RecipeRequirement;
 import fr.frinn.custommachinery.api.requirement.RequirementIOMode;
 import fr.frinn.custommachinery.api.requirement.RequirementType;
-import fr.frinn.custommachinery.impl.requirement.AbstractRequirement;
 import fr.frinn.custommachinery.impl.util.IntRange;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.client.jei.heat.Heat;
@@ -22,7 +23,7 @@ import net.minecraft.network.chat.Component;
 import java.util.Collections;
 import java.util.List;
 
-public class TemperatureRequirement extends AbstractRequirement<HeatMachineComponent> implements ITickableRequirement<HeatMachineComponent>, IJEIIngredientRequirement<Heat> {
+public class TemperatureRequirement implements IRequirement<HeatMachineComponent>, IJEIIngredientRequirement<Heat> {
 
     public static final NamedCodec<TemperatureRequirement> CODEC = NamedCodec.record(temperatureRequirementInstance ->
             temperatureRequirementInstance.group(
@@ -35,7 +36,6 @@ public class TemperatureRequirement extends AbstractRequirement<HeatMachineCompo
     private final TemperatureUnit unit;
 
     public TemperatureRequirement(IntRange temp, TemperatureUnit unit) {
-        super(RequirementIOMode.INPUT);
         this.temp = temp;
         this.unit = unit;
     }
@@ -51,29 +51,28 @@ public class TemperatureRequirement extends AbstractRequirement<HeatMachineCompo
     }
 
     @Override
+    public RequirementIOMode getMode() {
+        return RequirementIOMode.INPUT;
+    }
+
+    @Override
     public boolean test(HeatMachineComponent component, ICraftingContext context) {
         return this.temp.contains((int) this.unit.convertFromK(component.getTemperature(0), true));
     }
 
     @Override
-    public CraftingResult processStart(HeatMachineComponent component, ICraftingContext context) {
-        return CraftingResult.pass();
+    public void gatherRequirements(IRequirementList<HeatMachineComponent> list) {
+        list.inventoryCondition(this::check);
     }
 
-    @Override
-    public CraftingResult processEnd(HeatMachineComponent component, ICraftingContext context) {
-        return CraftingResult.pass();
-    }
-
-    @Override
-    public CraftingResult processTick(HeatMachineComponent component, ICraftingContext context) {
+    private CraftingResult check(HeatMachineComponent component, ICraftingContext context) {
         if(test(component, context))
             return CraftingResult.success();
-        return CraftingResult.error(Component.translatable("custommachinerymekanism.requirements.temp.error", this.temp.toFormattedString() + this.unit.getSymbol()));
+        return CraftingResult.error(Component.translatable("custommachinerymekanism.requirements.temp.error", this.temp.toFormattedString() + this.unit.getSymbol(false)));
     }
 
     @Override
-    public List<IJEIIngredientWrapper<Heat>> getJEIIngredientWrappers(IMachineRecipe recipe) {
+    public List<IJEIIngredientWrapper<Heat>> getJEIIngredientWrappers(IMachineRecipe recipe, RecipeRequirement<?, ?> requirement) {
         return Collections.singletonList(new TemperatureIngredientWrapper(this.temp, this.unit));
     }
 }

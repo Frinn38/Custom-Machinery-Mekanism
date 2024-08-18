@@ -21,7 +21,7 @@ public class PigmentRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder requirePigment(CustomCraftRecipeCTBuilder builder, ICrTPigmentStack stack, String tank) {
-        return builder.addRequirement(new PigmentRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new PigmentRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -31,7 +31,7 @@ public class PigmentRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder requirePigmentPerTick(CustomCraftRecipeCTBuilder builder, ICrTPigmentStack stack, String tank) {
-        return builder.addRequirement(new PigmentPerTickRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new PigmentPerTickRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -41,7 +41,7 @@ public class PigmentRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder producePigment(CustomCraftRecipeCTBuilder builder, ICrTPigmentStack stack, String tank) {
-        return builder.addRequirement(new PigmentRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new PigmentRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     @Method
@@ -51,6 +51,6 @@ public class PigmentRequirementCT {
 
     @Method
     public static CustomCraftRecipeCTBuilder producePigmentPerTick(CustomCraftRecipeCTBuilder builder, ICrTPigmentStack stack, String tank) {
-        return builder.addRequirement(new PigmentPerTickRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return builder.addRequirement(new PigmentPerTickRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 }

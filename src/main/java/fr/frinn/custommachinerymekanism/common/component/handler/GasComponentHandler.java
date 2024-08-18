@@ -10,7 +10,7 @@ import mekanism.api.chemical.gas.GasStack;
 import mekanism.api.chemical.gas.IGasHandler;
 import mekanism.common.capabilities.Capabilities;
 import net.minecraft.core.Direction;
-import net.minecraftforge.common.capabilities.Capability;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,8 +22,8 @@ public class GasComponentHandler extends ChemicalComponentHandler<Gas, GasStack,
     }
 
     @Override
-    public Capability<IGasHandler> targetCap() {
-        return Capabilities.GAS_HANDLER;
+    public BlockCapability<IGasHandler, Direction> targetCap() {
+        return Capabilities.GAS.block();
     }
 
     @Override

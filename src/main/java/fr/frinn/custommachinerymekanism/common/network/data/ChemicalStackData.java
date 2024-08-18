@@ -3,7 +3,8 @@ package fr.frinn.custommachinerymekanism.common.network.data;
 import fr.frinn.custommachinery.api.network.IData;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 public abstract class ChemicalStackData<C extends Chemical<C>, S extends ChemicalStack<C>> implements IData<S> {
 
@@ -14,6 +15,8 @@ public abstract class ChemicalStackData<C extends Chemical<C>, S extends Chemica
         this.id = id;
         this.value = value;
     }
+
+    public abstract StreamCodec<RegistryFriendlyByteBuf, S> codec();
 
     @Override
     public short getID() {
@@ -26,8 +29,8 @@ public abstract class ChemicalStackData<C extends Chemical<C>, S extends Chemica
     }
 
     @Override
-    public void writeData(FriendlyByteBuf buffer) {
+    public void writeData(RegistryFriendlyByteBuf buffer) {
         IData.super.writeData(buffer);
-        this.value.writeToPacket(buffer);
+        this.codec().encode(buffer, this.value);
     }
 }

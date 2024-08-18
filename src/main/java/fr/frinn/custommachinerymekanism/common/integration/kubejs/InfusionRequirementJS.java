@@ -13,7 +13,7 @@ public interface InfusionRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder requireInfusion(InfusionStack stack, String tank) {
-        return addRequirement(new InfusionRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new InfusionRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder requireInfusionPerTick(InfusionStack stack) {
@@ -21,7 +21,7 @@ public interface InfusionRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder requireInfusionPerTick(InfusionStack stack, String tank) {
-        return addRequirement(new InfusionPerTickRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new InfusionPerTickRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder produceInfusion(InfusionStack stack) {
@@ -29,7 +29,7 @@ public interface InfusionRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder produceInfusion(InfusionStack stack, String tank) {
-        return addRequirement(new InfusionRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new InfusionRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder produceInfusionPerTick(InfusionStack stack) {
@@ -37,6 +37,6 @@ public interface InfusionRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder produceInfusionPerTick(InfusionStack stack, String tank) {
-        return addRequirement(new InfusionPerTickRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new InfusionPerTickRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 }

@@ -13,7 +13,7 @@ public interface GasRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder requireGas(GasStack stack, String tank) {
-        return addRequirement(new GasRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new GasRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder requireGasPerTick(GasStack stack) {
@@ -21,7 +21,7 @@ public interface GasRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder requireGasPerTick(GasStack stack, String tank) {
-        return addRequirement(new GasPerTickRequirement(RequirementIOMode.INPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new GasPerTickRequirement(RequirementIOMode.INPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder produceGas(GasStack stack) {
@@ -29,7 +29,7 @@ public interface GasRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder produceGas(GasStack stack, String tank) {
-        return addRequirement(new GasRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new GasRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 
     default RecipeJSBuilder produceGasPerTick(GasStack stack) {
@@ -37,6 +37,6 @@ public interface GasRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder produceGasPerTick(GasStack stack, String tank) {
-        return addRequirement(new GasPerTickRequirement(RequirementIOMode.OUTPUT, stack.getType(), stack.getAmount(), tank));
+        return addRequirement(new GasPerTickRequirement(RequirementIOMode.OUTPUT, stack.getChemical(), stack.getAmount(), tank));
     }
 }

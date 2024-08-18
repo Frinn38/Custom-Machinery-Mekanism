@@ -4,7 +4,8 @@ import fr.frinn.custommachinery.api.network.DataType;
 import fr.frinn.custommachinerymekanism.Registration;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 
 public class SlurryStackData extends ChemicalStackData<Slurry, SlurryStack> {
 
@@ -12,8 +13,13 @@ public class SlurryStackData extends ChemicalStackData<Slurry, SlurryStack> {
         super(id, value);
     }
 
-    public SlurryStackData(short id, FriendlyByteBuf buf) {
-        super(id, SlurryStack.readFromPacket(buf));
+    public SlurryStackData(short id, RegistryFriendlyByteBuf buf) {
+        super(id, SlurryStack.OPTIONAL_STREAM_CODEC.decode(buf));
+    }
+
+    @Override
+    public StreamCodec<RegistryFriendlyByteBuf, SlurryStack> codec() {
+        return SlurryStack.OPTIONAL_STREAM_CODEC;
     }
 
     @Override

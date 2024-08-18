@@ -28,7 +28,7 @@ public class HeatIngredientHelper implements IIngredientHelper<Heat> {
 
     @Override
     public ResourceLocation getResourceLocation(Heat ingredient) {
-        return new ResourceLocation(CustomMachineryMekanism.MODID, "heat");
+        return CustomMachineryMekanism.rl("heat");
     }
 
     @Override

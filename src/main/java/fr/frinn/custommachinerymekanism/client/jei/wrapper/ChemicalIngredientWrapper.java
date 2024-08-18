@@ -8,7 +8,7 @@ import fr.frinn.custommachinery.api.requirement.RequirementIOMode;
 import fr.frinn.custommachinerymekanism.common.guielement.ChemicalGuiElement;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
-import mekanism.client.jei.ChemicalStackRenderer;
+import mekanism.client.recipe_viewer.jei.ChemicalStackRenderer;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.ingredients.IIngredientType;
 import net.minecraft.ChatFormatting;
@@ -51,7 +51,7 @@ public class ChemicalIngredientWrapper<C extends Chemical<C>, S extends Chemical
             builder.addSlot(roleFromMode(this.mode), element.getX() - xOffset, element.getY() - yOffset)
                     .setCustomRenderer(this.ingredientType, new ChemicalStackRenderer<>(this.amount, element.getWidth() - 2, element.getHeight() - 2))
                     .addIngredient(this.ingredientType, ingredient)
-                    .addTooltipCallback((view, tooltips) -> {
+                    .addRichTooltipCallback((view, tooltips) -> {
                         if(this.isPerTick)
                             tooltips.add(Component.translatable("custommachinery.jei.ingredient.fluid.pertick"));
 
