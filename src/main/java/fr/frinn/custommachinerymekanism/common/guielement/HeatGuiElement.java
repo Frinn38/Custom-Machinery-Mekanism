@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public class HeatGuiElement extends AbstractTexturedGuiElement implements IComponentGuiElement<HeatMachineComponent> {
 
-    private static final ResourceLocation BASE_TEXTURE = ICustomMachineryAPI.INSTANCE.rl("textures/gui/base_fluid_storage.png");
+    public static final ResourceLocation BASE_TEXTURE = ICustomMachineryAPI.INSTANCE.rl("textures/gui/base_fluid_storage.png");
 
     public static final NamedCodec<HeatGuiElement> CODEC = NamedCodec.record(instance ->
             instance.group(

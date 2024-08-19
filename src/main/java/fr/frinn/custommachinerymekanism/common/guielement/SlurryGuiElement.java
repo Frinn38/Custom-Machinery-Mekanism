@@ -5,14 +5,13 @@ import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.guielement.GuiElementType;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.SlurryMachineComponent;
-import net.minecraft.resources.ResourceLocation;
 
 public class SlurryGuiElement extends ChemicalGuiElement<SlurryMachineComponent> {
 
     public static final NamedCodec<SlurryGuiElement> CODEC = makeCodec(SlurryGuiElement::new, "Slurry gui element");
 
-    public SlurryGuiElement(Properties properties, String id, boolean highlight) {
-        super(properties, id, highlight);
+    public SlurryGuiElement(Properties properties, boolean highlight) {
+        super(properties, highlight);
     }
 
     @Override

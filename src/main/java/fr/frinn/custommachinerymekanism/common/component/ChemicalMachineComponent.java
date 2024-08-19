@@ -1,6 +1,5 @@
 package fr.frinn.custommachinerymekanism.common.component;
 
-import com.mojang.datafixers.util.Function9;
 import fr.frinn.custommachinery.api.codec.NamedCodec;
 import fr.frinn.custommachinery.api.component.ComponentIOMode;
 import fr.frinn.custommachinery.api.component.IComparatorInputComponent;
@@ -11,6 +10,8 @@ import fr.frinn.custommachinery.api.component.ISideConfigComponent;
 import fr.frinn.custommachinery.api.network.DataType;
 import fr.frinn.custommachinery.api.network.ISyncable;
 import fr.frinn.custommachinery.api.network.ISyncableStuff;
+import fr.frinn.custommachinery.api.utils.Filter;
+import fr.frinn.custommachinery.impl.codec.DefaultCodecs;
 import fr.frinn.custommachinery.impl.component.AbstractMachineComponent;
 import fr.frinn.custommachinery.impl.component.config.SideConfig;
 import fr.frinn.custommachinerymekanism.common.network.syncable.ChemicalStackSyncable;
@@ -18,10 +19,10 @@ import mekanism.api.Action;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -30,8 +31,7 @@ public abstract class ChemicalMachineComponent<C extends Chemical<C>, S extends 
 
     private final String id;
     private final long capacity;
-    private final List<C> filter;
-    private final boolean whitelist;
+    private final Filter<C> filter;
     private final long maxInput;
     private final long maxOutput;
     private final SideConfig config;
@@ -39,12 +39,11 @@ public abstract class ChemicalMachineComponent<C extends Chemical<C>, S extends 
 
     private S stack = empty();
 
-    public ChemicalMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, List<C> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+    public ChemicalMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<C> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
         super(manager, mode);
         this.id = id;
         this.capacity = capacity;
         this.filter = filter;
-        this.whitelist = whitelist;
         this.maxInput = maxInput;
         this.maxOutput = maxOutput;
         this.config = config.build(this);
@@ -88,7 +87,7 @@ public abstract class ChemicalMachineComponent<C extends Chemical<C>, S extends 
             return false;
 
         //Check filter
-        if(this.filter.stream().anyMatch(gas -> gas == stack.getChemical()) != this.whitelist)
+        if(!this.filter.test(stack.getChemical()))
             return false;
 
         //Check if same chemical
@@ -160,40 +159,41 @@ public abstract class ChemicalMachineComponent<C extends Chemical<C>, S extends 
 
     public static abstract class Template<C extends Chemical<C>, S extends ChemicalStack<C>, T extends ChemicalMachineComponent<C, S>> implements IMachineComponentTemplate<T> {
 
-        public static <C extends Chemical<C>, S extends ChemicalStack<C>, T extends ChemicalMachineComponent<C, S>> NamedCodec<Template<C, S, T>> makeCodec(NamedCodec<C> codec, Function9<String, Long, ComponentIOMode, List<C>, Boolean, Long, Long, SideConfig.Template, Boolean, Template<C, S, T>> builder) {
+        public interface Builder<C extends Chemical<C>, S extends ChemicalStack<C>, CM extends ChemicalMachineComponent<C, S>, T extends Template<C, S, CM>> {
+            T build(String id, long capacity, ComponentIOMode mode, Filter<C> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique);
+        }
+
+        public static <C extends Chemical<C>, S extends ChemicalStack<C>, CM extends ChemicalMachineComponent<C, S>, T extends Template<C, S, CM>> NamedCodec<T> makeCodec(Registry<C> registry, Builder<C, S, CM, T> builder) {
             return NamedCodec.record(templateInstance ->
                     templateInstance.group(
                             NamedCodec.STRING.fieldOf("id").forGetter(template -> template.id),
                             NamedCodec.LONG.fieldOf("capacity").forGetter(template -> template.capacity),
                             ComponentIOMode.CODEC.optionalFieldOf("mode", ComponentIOMode.BOTH).forGetter(template -> template.mode),
-                            codec.listOf().optionalFieldOf("filter", Collections.emptyList()).forGetter(template -> template.filter),
-                            NamedCodec.BOOL.optionalFieldOf("whitelist", false).forGetter(template -> template.whitelist),
-                            NamedCodec.LONG.optionalFieldOf("max_input").forGetter(template -> Optional.of(template.maxInput)),
-                            NamedCodec.LONG.optionalFieldOf("max_output").forGetter(template -> Optional.of(template.maxOutput)),
-                            SideConfig.Template.CODEC.optionalFieldOf("config").forGetter(template -> Optional.of(template.config)),
+                            Filter.codec(DefaultCodecs.registryValueOrTag(registry)).orElse(Filter.empty()).forGetter(template -> template.filter),
+                            NamedCodec.LONG.optionalFieldOf("max_input").forGetter(template -> template.maxInput == template.capacity ? Optional.empty() : Optional.of(template.maxInput)),
+                            NamedCodec.LONG.optionalFieldOf("max_output").forGetter(template -> template.maxOutput == template.capacity ? Optional.empty() : Optional.of(template.maxOutput)),
+                            SideConfig.Template.CODEC.optionalFieldOf("config").forGetter(template -> template.config == template.mode.getBaseConfig() ? Optional.empty() : Optional.of(template.config)),
                             NamedCodec.BOOL.optionalFieldOf("unique", false).forGetter(template -> template.unique)
-                    ).apply(templateInstance, (id, capacity, mode, filter, whitelist, maxInput, maxOutput, config, unique) ->
-                            builder.apply(id, capacity, mode, filter, whitelist, maxInput.orElse(capacity), maxOutput.orElse(capacity), config.orElse(mode.getBaseConfig()), unique)
-                    ), codec.name() + " machine component"
+                    ).apply(templateInstance, (id, capacity, mode, filter, maxInput, maxOutput, config, unique) ->
+                            builder.build(id, capacity, mode, filter, maxInput.orElse(capacity), maxOutput.orElse(capacity), config.orElse(mode.getBaseConfig()), unique)
+                    ), "Chemical machine component"
             );
         }
 
-        private final String id;
-        private final long capacity;
-        private final ComponentIOMode mode;
-        private final List<C> filter;
-        private final boolean whitelist;
-        private final long maxInput;
-        private final long maxOutput;
-        private final SideConfig.Template config;
-        private final boolean unique;
+        public final String id;
+        public final long capacity;
+        public final ComponentIOMode mode;
+        public final Filter<C> filter;
+        public final long maxInput;
+        public final long maxOutput;
+        public final SideConfig.Template config;
+        public final boolean unique;
 
-        public Template(String id, long capacity, ComponentIOMode mode, List<C> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+        public Template(String id, long capacity, ComponentIOMode mode, Filter<C> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
             this.id = id;
             this.capacity = capacity;
             this.mode = mode;
             this.filter = filter;
-            this.whitelist = whitelist;
             this.maxInput = maxInput;
             this.maxOutput = maxOutput;
             this.config = config;
@@ -207,27 +207,28 @@ public abstract class ChemicalMachineComponent<C extends Chemical<C>, S extends 
             return this.id;
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         public boolean canAccept(Object ingredient, boolean isInput, IMachineComponentManager manager) {
             if(this.mode != ComponentIOMode.BOTH && isInput != this.mode.isInput())
                 return false;
             if(ingredient instanceof ChemicalStack<?> stack && isSameType(stack)) {
-                return this.filter.stream().anyMatch(g -> g == stack.getChemical()) == this.whitelist;
+                return this.filter.test((C)stack.getChemical());
             } else if(ingredient instanceof List<?> list) {
                 return list.stream().allMatch(object -> {
                     if(object instanceof ChemicalStack<?> stack && isSameType(stack))
-                        return this.filter.stream().anyMatch(g -> g == stack.getChemical()) == this.whitelist;
+                        return this.filter.test((C)stack.getChemical());
                     return false;
                 });
             }
             return false;
         }
 
-        public abstract T build(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, List<C> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique);
+        public abstract T build(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<C> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique);
 
         @Override
         public T build(IMachineComponentManager manager) {
-            return build(manager, this.id, this.capacity, this.mode, this.filter, this.whitelist, this.maxInput, this.maxOutput, this.config, this.unique);
+            return build(manager, this.id, this.capacity, this.mode, this.filter, this.maxInput, this.maxOutput, this.config, this.unique);
         }
     }
 }

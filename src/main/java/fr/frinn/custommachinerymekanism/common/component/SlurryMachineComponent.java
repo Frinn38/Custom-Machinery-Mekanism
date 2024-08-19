@@ -4,21 +4,20 @@ import fr.frinn.custommachinery.api.codec.NamedCodec;
 import fr.frinn.custommachinery.api.component.ComponentIOMode;
 import fr.frinn.custommachinery.api.component.IMachineComponentManager;
 import fr.frinn.custommachinery.api.component.MachineComponentType;
+import fr.frinn.custommachinery.api.utils.Filter;
 import fr.frinn.custommachinery.impl.component.config.SideConfig;
 import fr.frinn.custommachinerymekanism.Registration;
-import fr.frinn.custommachinerymekanism.common.utils.Codecs;
+import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.slurry.Slurry;
 import mekanism.api.chemical.slurry.SlurryStack;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
-import java.util.List;
-
 public class SlurryMachineComponent extends ChemicalMachineComponent<Slurry, SlurryStack> {
 
-    public SlurryMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, List<Slurry> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
-        super(manager, id, capacity, mode, filter, whitelist, maxInput, maxOutput, config, unique);
+    public SlurryMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<Slurry> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+        super(manager, id, capacity, mode, filter, maxInput, maxOutput, config, unique);
     }
 
     @Override
@@ -43,10 +42,10 @@ public class SlurryMachineComponent extends ChemicalMachineComponent<Slurry, Slu
 
     public static class Template extends ChemicalMachineComponent.Template<Slurry, SlurryStack, SlurryMachineComponent> {
 
-        public static final NamedCodec<ChemicalMachineComponent.Template<Slurry, SlurryStack, SlurryMachineComponent>> CODEC = makeCodec(Codecs.SLURRY, Template::new);
+        public static final NamedCodec<ChemicalMachineComponent.Template<Slurry, SlurryStack, SlurryMachineComponent>> CODEC = makeCodec(MekanismAPI.SLURRY_REGISTRY, Template::new);
 
-        public Template(String id, long capacity, ComponentIOMode mode, List<Slurry> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
-            super(id, capacity, mode, filter, whitelist, maxInput, maxOutput, config, unique);
+        public Template(String id, long capacity, ComponentIOMode mode, Filter<Slurry> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+            super(id, capacity, mode, filter, maxInput, maxOutput, config, unique);
         }
 
         @Override
@@ -55,8 +54,8 @@ public class SlurryMachineComponent extends ChemicalMachineComponent<Slurry, Slu
         }
 
         @Override
-        public SlurryMachineComponent build(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, List<Slurry> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
-            return new SlurryMachineComponent(manager, id, capacity, mode, filter, whitelist, maxInput, maxOutput, config, unique);
+        public SlurryMachineComponent build(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<Slurry> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+            return new SlurryMachineComponent(manager, id, capacity, mode, filter, maxInput, maxOutput, config, unique);
         }
 
         @Override

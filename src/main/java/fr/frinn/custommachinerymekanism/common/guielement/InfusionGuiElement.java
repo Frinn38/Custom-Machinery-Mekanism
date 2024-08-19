@@ -5,14 +5,13 @@ import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.guielement.GuiElementType;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.InfusionMachineComponent;
-import net.minecraft.resources.ResourceLocation;
 
 public class InfusionGuiElement extends ChemicalGuiElement<InfusionMachineComponent> {
 
     public static final NamedCodec<InfusionGuiElement> CODEC = makeCodec(InfusionGuiElement::new, "Infusion gui element");
 
-    public InfusionGuiElement(Properties properties, String id, boolean highlight) {
-        super(properties, id, highlight);
+    public InfusionGuiElement(Properties properties, boolean highlight) {
+        super(properties, highlight);
     }
 
     @Override

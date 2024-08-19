@@ -18,6 +18,7 @@ import fr.frinn.custommachinery.impl.component.config.RelativeSide;
 import fr.frinn.custommachinery.impl.component.config.SideConfig;
 import fr.frinn.custommachinery.impl.component.config.SideMode;
 import fr.frinn.custommachinerymekanism.Registration;
+import fr.frinn.custommachinerymekanism.client.jei.heat.Heat;
 import mekanism.api.heat.HeatAPI.HeatTransfer;
 import mekanism.api.heat.IHeatCapacitor;
 import mekanism.api.heat.IHeatHandler;
@@ -26,17 +27,18 @@ import mekanism.common.capabilities.heat.BasicHeatCapacitor;
 import mekanism.common.capabilities.heat.ITileHeatHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class HeatMachineComponent extends AbstractMachineComponent implements ISideConfigComponent, ITileHeatHandler, ISerializableComponent, ISyncableStuff, ITickableComponent, IDumpComponent {
@@ -44,8 +46,7 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
     private final double baseTemp;
     private final SideConfig config;
     private final BasicHeatCapacitor capacitor;
-    private final Map<Direction, LazyOptional<IHeatHandler>> neighbours = Maps.newEnumMap(Direction.class);
-    private LazyOptional<IHeatHandler> handler;
+    private final Map<Direction, BlockCapabilityCache<IHeatHandler, Direction>> neighbours = Maps.newEnumMap(Direction.class);
     private double lastEnvironmentalLoss;
 
     public HeatMachineComponent(IMachineComponentManager manager, double capacity, double baseTemp, double inverseConductionCoefficient, double inverseInsulationCoefficient, SideConfig.Template config) {
@@ -54,7 +55,6 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
         this.config = config.build(this);
         this.config.setCallback(this::onConfigChange);
         this.capacitor = BasicHeatCapacitor.create(capacity, inverseConductionCoefficient, inverseInsulationCoefficient, () -> baseTemp, this);
-        this.handler = LazyOptional.of(() -> this);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
 
     @Override
     public String getId() {
-        return "Heat";
+        return "";
     }
 
     @Override
@@ -94,8 +94,6 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
     }
 
     private void onConfigChange(RelativeSide side, SideMode old, SideMode now) {
-        this.handler.invalidate();
-        this.handler = LazyOptional.of(() -> this);
         if(old.isNone())
             this.getManager().getLevel().updateNeighborsAt(this.getManager().getTile().getBlockPos(), this.getManager().getTile().getBlockState().getBlock());
     }
@@ -104,33 +102,34 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
         Level level = this.getManager().getLevel();
         BlockPos pos = this.getManager().getTile().getBlockPos();
         for(Direction side : Direction.values()) {
-            LazyOptional<IHeatHandler> handler = this.neighbours.get(side);
-            if(handler == null) {
-                this.neighbours.put(side, LazyOptional.empty());
+            BlockCapabilityCache<IHeatHandler, Direction> cache = this.neighbours.get(side);
+            if(cache == null)
                 continue;
-            }
-            else if(handler.isPresent())
+            else if(cache.getCapability() == null)
+                this.neighbours.remove(side);
+            else if(cache.getCapability() != null)
                 continue;
             BlockEntity be = level.getBlockEntity(pos.relative(side));
             if(be == null)
                 continue;
-            this.neighbours.put(side, be.getCapability(Capabilities.HEAT_HANDLER, side.getOpposite()));
+            this.neighbours.put(side, BlockCapabilityCache.create(Capabilities.HEAT, (ServerLevel) level, pos.relative(side), side.getOpposite(), () -> !this.getManager().getTile().isRemoved(), () -> this.neighbours.remove(side)));
         }
     }
 
-    public LazyOptional<IHeatHandler> getHeatHandler(@Nullable Direction side) {
+    @Nullable
+    public IHeatHandler getHeatHandler(@Nullable Direction side) {
         if(!this.config.getSideMode(side).isNone())
-            return this.handler;
-        return LazyOptional.empty();
+            return this;
+        return null;
     }
 
     @Override
-    public void serialize(CompoundTag nbt) {
+    public void serialize(CompoundTag nbt, HolderLookup.Provider registries) {
         nbt.putDouble("Heat", this.capacitor.getHeat());
     }
 
     @Override
-    public void deserialize(CompoundTag nbt) {
+    public void deserialize(CompoundTag nbt, HolderLookup.Provider registries) {
         if(nbt.contains("Heat", Tag.TAG_DOUBLE))
             this.capacitor.setHeat(nbt.getDouble("Heat"));
     }
@@ -157,10 +156,10 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
     @Nullable
     @Override
     public IHeatHandler getAdjacent(Direction side) {
-        return this.neighbours.get(side).orElse(null);
+        return this.neighbours.get(side) == null ? null : this.neighbours.get(side).getCapability();
     }
 
-    public static class Template implements IMachineComponentTemplate<HeatMachineComponent> {
+    public record Template(double capacity, double baseTemp, double inverseConductionCoefficient, double inverseInsulationCoefficient, SideConfig.Template config) implements IMachineComponentTemplate<HeatMachineComponent> {
 
         public static final NamedCodec<Template> CODEC = NamedCodec.record(templateInstance ->
                 templateInstance.group(
@@ -168,25 +167,9 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
                         NamedCodec.DOUBLE.optionalFieldOf("base_temp", 300.0D).forGetter(template -> template.baseTemp),
                         NamedCodec.DOUBLE.optionalFieldOf("conduction", 1.0D).forGetter(template -> template.inverseConductionCoefficient),
                         NamedCodec.DOUBLE.optionalFieldOf("insulation", 0.0D).forGetter(template -> template.inverseInsulationCoefficient),
-                        SideConfig.Template.CODEC.optionalFieldOf("config").forGetter(template -> Optional.of(template.config))
-                ).apply(templateInstance, (capacity, baseTemp, conduction, insulation, config) ->
-                        new Template(capacity, baseTemp, conduction, insulation, config.orElse(ComponentIOMode.INPUT.getBaseConfig()))
-                ), "Heat machine component"
+                        SideConfig.Template.CODEC.optionalFieldOf("config", ComponentIOMode.INPUT.getBaseConfig()).forGetter(template -> template.config)
+                ).apply(templateInstance, Template::new), "Heat machine component"
         );
-
-        private final double capacity;
-        private final double baseTemp;
-        private final double inverseConductionCoefficient;
-        private final double inverseInsulationCoefficient;
-        private final SideConfig.Template config;
-
-        public Template(double capacity, double baseTemp, double inverseConductionCoefficient, double inverseInsulationCoefficient, SideConfig.Template config) {
-            this.capacity = capacity;
-            this.baseTemp = baseTemp;
-            this.inverseConductionCoefficient = inverseConductionCoefficient;
-            this.inverseInsulationCoefficient = inverseInsulationCoefficient;
-            this.config = config;
-        }
 
         @Override
         public MachineComponentType<HeatMachineComponent> getType() {
@@ -200,7 +183,7 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
 
         @Override
         public boolean canAccept(Object ingredient, boolean isInput, IMachineComponentManager manager) {
-            return true;
+            return ingredient instanceof Heat;
         }
 
         @Override

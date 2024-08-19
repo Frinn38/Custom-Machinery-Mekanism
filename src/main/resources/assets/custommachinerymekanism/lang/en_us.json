@@ -9,9 +9,37 @@
   "custommachinerymekanism.requirements.radiation.info.tick.input": "Remove %s/t in a %s blocks radius",
   "custommachinerymekanism.requirements.radiation.info.tick.output": "Emit %s/t",
 
+  "custommachinerymekanism.gui.creation.components.heat.title": "Heat component",
+  "custommachinerymekanism.gui.creation.components.heat.capacity": "Capacity",
+  "custommachinerymekanism.gui.creation.components.heat.capacity.tooltip": "The max temperature (in Kelvin) the machine can handle",
+  "custommachinerymekanism.gui.creation.components.heat.base": "Base temperature",
+  "custommachinerymekanism.gui.creation.components.heat.base.tooltip": "The temperature (in Kelvin) the machine will have when no heat is provided",
+  "custommachinerymekanism.gui.creation.components.heat.conduction": "Conduction",
+  "custommachinerymekanism.gui.creation.components.heat.conduction.tooltip": "A coefficient that determines how much heat can be inserted or extracted\nHigher values mean more heat can be extracted but fewer heat inserted",
+  "custommachinerymekanism.gui.creation.components.heat.insulation": "Insulation",
+  "custommachinerymekanism.gui.creation.components.heat.insulation.tooltip": "A coefficient that determines how much heat will be dissipated into the environment (lost)\nHigher values mean less heat loss",
+  "custommachinerymekanism.gui.creation.components.gas.title": "Gas component",
+  "custommachinerymekanism.gui.creation.components.infusion.title": "Infusion component",
+  "custommachinerymekanism.gui.creation.components.pigment.title": "Pigment component",
+  "custommachinerymekanism.gui.creation.components.slurry.title": "Slurry component",
+
   "custommachinerymekanism.jei.ingredient.heat": "Heat:  %s",
   "custommachinerymekanism.jei.ingredient.heat.input": "Consume %sHeat",
   "custommachinerymekanism.jei.ingredient.heat.output": "Produce %sHeat",
   "custommachinerymekanism.jei.ingredient.heat.pertick.input": "Consume %sHeat/t",
-  "custommachinerymekanism.jei.ingredient.heat.pertick.output": "Produce %sHeat/t"
+  "custommachinerymekanism.jei.ingredient.heat.pertick.output": "Produce %sHeat/t",
+
+  "custommachinery.machine.component.heat": "Heat",
+  "custommachinery.machine.component.gas": "Gas",
+  "custommachinery.machine.component.infusion": "Infusion",
+  "custommachinery.machine.component.pigment": "Pigment",
+  "custommachinery.machine.component.slurry": "Slurry",
+  "custommachinery.machine.component.radiation": "Radiation",
+
+  "custommachinery.machine.guielement.heat": "Heat",
+  "custommachinery.machine.guielement.gas": "Gas",
+  "custommachinery.machine.guielement.infusion": "Infusion",
+  "custommachinery.machine.guielement.pigment": "Pigment",
+  "custommachinery.machine.guielement.slurry": "Slurry",
+  "custommachinery.machine.guielement.radiation": "Radiation"
 }

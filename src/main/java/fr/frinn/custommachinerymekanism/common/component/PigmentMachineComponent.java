@@ -4,21 +4,20 @@ import fr.frinn.custommachinery.api.codec.NamedCodec;
 import fr.frinn.custommachinery.api.component.ComponentIOMode;
 import fr.frinn.custommachinery.api.component.IMachineComponentManager;
 import fr.frinn.custommachinery.api.component.MachineComponentType;
+import fr.frinn.custommachinery.api.utils.Filter;
 import fr.frinn.custommachinery.impl.component.config.SideConfig;
 import fr.frinn.custommachinerymekanism.Registration;
-import fr.frinn.custommachinerymekanism.common.utils.Codecs;
+import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.pigment.Pigment;
 import mekanism.api.chemical.pigment.PigmentStack;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
-import java.util.List;
-
 public class PigmentMachineComponent extends ChemicalMachineComponent<Pigment, PigmentStack> {
 
-    public PigmentMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, List<Pigment> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
-        super(manager, id, capacity, mode, filter, whitelist, maxInput, maxOutput, config, unique);
+    public PigmentMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<Pigment> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+        super(manager, id, capacity, mode, filter, maxInput, maxOutput, config, unique);
     }
 
     @Override
@@ -43,10 +42,10 @@ public class PigmentMachineComponent extends ChemicalMachineComponent<Pigment, P
 
     public static class Template extends ChemicalMachineComponent.Template<Pigment, PigmentStack, PigmentMachineComponent> {
 
-        public static final NamedCodec<ChemicalMachineComponent.Template<Pigment, PigmentStack, PigmentMachineComponent>> CODEC = makeCodec(Codecs.PIGMENT, Template::new);
+        public static final NamedCodec<ChemicalMachineComponent.Template<Pigment, PigmentStack, PigmentMachineComponent>> CODEC = makeCodec(MekanismAPI.PIGMENT_REGISTRY, Template::new);
 
-        public Template(String id, long capacity, ComponentIOMode mode, List<Pigment> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
-            super(id, capacity, mode, filter, whitelist, maxInput, maxOutput, config, unique);
+        public Template(String id, long capacity, ComponentIOMode mode, Filter<Pigment> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+            super(id, capacity, mode, filter, maxInput, maxOutput, config, unique);
         }
 
         @Override
@@ -55,8 +54,8 @@ public class PigmentMachineComponent extends ChemicalMachineComponent<Pigment, P
         }
 
         @Override
-        public PigmentMachineComponent build(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, List<Pigment> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
-            return new PigmentMachineComponent(manager, id, capacity, mode, filter, whitelist, maxInput, maxOutput, config, unique);
+        public PigmentMachineComponent build(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<Pigment> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+            return new PigmentMachineComponent(manager, id, capacity, mode, filter, maxInput, maxOutput, config, unique);
         }
 
         @Override

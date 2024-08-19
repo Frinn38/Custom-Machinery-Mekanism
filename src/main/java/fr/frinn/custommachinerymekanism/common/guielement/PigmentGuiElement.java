@@ -5,14 +5,13 @@ import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.guielement.GuiElementType;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.PigmentMachineComponent;
-import net.minecraft.resources.ResourceLocation;
 
 public class PigmentGuiElement extends ChemicalGuiElement<PigmentMachineComponent> {
 
     public static final NamedCodec<PigmentGuiElement> CODEC = makeCodec(PigmentGuiElement::new, "Pigment gui element");
 
-    public PigmentGuiElement(Properties properties, String id, boolean highlight) {
-        super(properties, id, highlight);
+    public PigmentGuiElement(Properties properties, boolean highlight) {
+        super(properties, highlight);
     }
 
     @Override

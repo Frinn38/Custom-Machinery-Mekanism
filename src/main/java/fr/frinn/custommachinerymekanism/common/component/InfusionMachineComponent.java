@@ -4,21 +4,20 @@ import fr.frinn.custommachinery.api.codec.NamedCodec;
 import fr.frinn.custommachinery.api.component.ComponentIOMode;
 import fr.frinn.custommachinery.api.component.IMachineComponentManager;
 import fr.frinn.custommachinery.api.component.MachineComponentType;
+import fr.frinn.custommachinery.api.utils.Filter;
 import fr.frinn.custommachinery.impl.component.config.SideConfig;
 import fr.frinn.custommachinerymekanism.Registration;
-import fr.frinn.custommachinerymekanism.common.utils.Codecs;
+import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.infuse.InfuseType;
 import mekanism.api.chemical.infuse.InfusionStack;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 
-import java.util.List;
-
 public class InfusionMachineComponent extends ChemicalMachineComponent<InfuseType, InfusionStack> {
 
-    public InfusionMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, List<InfuseType> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
-        super(manager, id, capacity, mode, filter, whitelist, maxInput, maxOutput, config, unique);
+    public InfusionMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<InfuseType> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+        super(manager, id, capacity, mode, filter, maxInput, maxOutput, config, unique);
     }
 
     @Override
@@ -43,10 +42,10 @@ public class InfusionMachineComponent extends ChemicalMachineComponent<InfuseTyp
 
     public static class Template extends ChemicalMachineComponent.Template<InfuseType, InfusionStack, InfusionMachineComponent> {
 
-        public static final NamedCodec<ChemicalMachineComponent.Template<InfuseType, InfusionStack, InfusionMachineComponent>> CODEC = makeCodec(Codecs.INFUSE_TYPE, Template::new);
+        public static final NamedCodec<ChemicalMachineComponent.Template<InfuseType, InfusionStack, InfusionMachineComponent>> CODEC = makeCodec(MekanismAPI.INFUSE_TYPE_REGISTRY, Template::new);
 
-        public Template(String id, long capacity, ComponentIOMode mode, List<InfuseType> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
-            super(id, capacity, mode, filter, whitelist, maxInput, maxOutput, config, unique);
+        public Template(String id, long capacity, ComponentIOMode mode, Filter<InfuseType> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+            super(id, capacity, mode, filter, maxInput, maxOutput, config, unique);
         }
 
         @Override
@@ -55,8 +54,8 @@ public class InfusionMachineComponent extends ChemicalMachineComponent<InfuseTyp
         }
 
         @Override
-        public InfusionMachineComponent build(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, List<InfuseType> filter, boolean whitelist, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
-            return new InfusionMachineComponent(manager, id, capacity, mode, filter, whitelist, maxInput, maxOutput, config, unique);
+        public InfusionMachineComponent build(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<InfuseType> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+            return new InfusionMachineComponent(manager, id, capacity, mode, filter, maxInput, maxOutput, config, unique);
         }
 
         @Override
