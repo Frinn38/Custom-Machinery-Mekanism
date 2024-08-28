@@ -1,10 +1,13 @@
 package fr.frinn.custommachinerymekanism.client;
 
-import com.mojang.blaze3d.systems.RenderSystem;
+import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.guielement.RegisterGuiElementWidgetSupplierEvent;
 import fr.frinn.custommachinery.api.integration.jei.RegisterGuiElementJEIRendererEvent;
+import fr.frinn.custommachinery.api.integration.jei.RegisterWidgetToJeiIngredientGetterEvent;
 import fr.frinn.custommachinery.client.screen.creation.component.RegisterComponentBuilderEvent;
 import fr.frinn.custommachinery.client.screen.creation.gui.RegisterGuiElementBuilderEvent;
+import fr.frinn.custommachinery.impl.guielement.AbstractGuiElementWidget;
+import fr.frinn.custommachinery.impl.integration.jei.WidgetToJeiIngredientRegistry.IngredientGetter;
 import fr.frinn.custommachinerymekanism.CustomMachineryMekanism;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.client.jei.element.ChemicalGuiElementJeiRenderer;
@@ -18,22 +21,28 @@ import fr.frinn.custommachinerymekanism.client.screen.creation.component.Chemica
 import fr.frinn.custommachinerymekanism.client.screen.creation.component.HeatComponentBuilder;
 import fr.frinn.custommachinerymekanism.client.screen.creation.gui.ChemicalGuiElementBuilder;
 import fr.frinn.custommachinerymekanism.client.screen.creation.gui.HeatGuiElementBuilder;
+import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent;
 import fr.frinn.custommachinerymekanism.common.component.GasMachineComponent;
 import fr.frinn.custommachinerymekanism.common.component.InfusionMachineComponent;
 import fr.frinn.custommachinerymekanism.common.component.PigmentMachineComponent;
 import fr.frinn.custommachinerymekanism.common.component.SlurryMachineComponent;
+import fr.frinn.custommachinerymekanism.common.guielement.ChemicalGuiElement;
 import fr.frinn.custommachinerymekanism.common.guielement.GasGuiElement;
 import fr.frinn.custommachinerymekanism.common.guielement.InfusionGuiElement;
 import fr.frinn.custommachinerymekanism.common.guielement.PigmentGuiElement;
 import fr.frinn.custommachinerymekanism.common.guielement.SlurryGuiElement;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
+import mekanism.api.chemical.Chemical;
+import mekanism.api.chemical.ChemicalStack;
+import mezz.jei.api.helpers.IJeiHelpers;
+import mezz.jei.api.ingredients.ITypedIngredient;
+import mezz.jei.api.runtime.IClickableIngredient;
+import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.EventBusSubscriber.Bus;
+import org.jetbrains.annotations.Nullable;
 
 @EventBusSubscriber(modid = CustomMachineryMekanism.MODID, bus = Bus.MOD, value = Dist.CLIENT)
 public class ClientHandler {
@@ -74,16 +83,37 @@ public class ClientHandler {
         event.register(Registration.HEAT_GUI_ELEMENT.get(), new HeatGuiElementJeiRenderer());
     }
 
-    public static void bindTexture(ResourceLocation texture) {
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, texture);
+    @SubscribeEvent
+    public static void registerWidgetToJeiIngredientGetters(final RegisterWidgetToJeiIngredientGetterEvent event) {
+        event.register(Registration.GAS_GUI_ELEMENT.get(), new ChemicalIngredientGetter<>(Registration.GAS_MACHINE_COMPONENT.get()));
+        event.register(Registration.INFUSION_GUI_ELEMENT.get(), new ChemicalIngredientGetter<>(Registration.INFUSION_MACHINE_COMPONENT.get()));
+        event.register(Registration.PIGMENT_GUI_ELEMENT.get(), new ChemicalIngredientGetter<>(Registration.PIGMENT_MACHINE_COMPONENT.get()));
+        event.register(Registration.SLURRY_GUI_ELEMENT.get(), new ChemicalIngredientGetter<>(Registration.SLURRY_MACHINE_COMPONENT.get()));
     }
 
-    public static void renderSlotHighlight(GuiGraphics graphics, int x, int y, int width, int height) {
-        RenderSystem.disableDepthTest();
-        RenderSystem.colorMask(true, true, true, false);
-        graphics.fill(x, y, x + width, y + height, -2130706433);
-        RenderSystem.colorMask(true, true, true, true);
-        RenderSystem.enableDepthTest();
+    private record ChemicalIngredientGetter<C extends Chemical<C>, S extends ChemicalStack<C>, CM extends ChemicalMachineComponent<C, S>, E extends ChemicalGuiElement<CM>>(
+            MachineComponentType<CM> type) implements IngredientGetter<E> {
+
+        @Nullable
+        @Override
+        public <T> IClickableIngredient<T> getIngredient(AbstractGuiElementWidget<E> widget, double mouseX, double mouseY, IJeiHelpers helpers) {
+            ChemicalMachineComponent<C, S> component = widget.getScreen().getTile().getComponentManager().getComponentHandler(type).flatMap(handler -> handler.getComponentForID(widget.getElement().getComponentId())).orElse(null);
+            if(component == null)
+                return null;
+            return helpers.getIngredientManager().createTypedIngredient(component.getStack()).map(ingredient ->
+                new IClickableIngredient<T>() {
+                    @SuppressWarnings("unchecked")
+                    @Override
+                    public ITypedIngredient<T> getTypedIngredient() {
+                        return (ITypedIngredient<T>) ingredient;
+                    }
+
+                    @Override
+                    public Rect2i getArea() {
+                        return new Rect2i(widget.getX(), widget.getY(), widget.getWidth(), widget.getHeight());
+                    }
+                }
+            ).orElse(null);
+        }
     }
 }

@@ -48,7 +48,7 @@ public class ChemicalIngredientWrapper<C extends Chemical<C>, S extends Chemical
         S ingredient = this.stackBuilder.apply(this.chemical, this.amount);
         Optional<IMachineComponentTemplate<?>> template = helper.getComponentForElement(chemicalElement);
         if(chemicalElement.getComponentId().equals(this.tank) || template.map(t -> t.canAccept(ingredient, this.mode == RequirementIOMode.INPUT, helper.getDummyManager()) && (this.tank.isEmpty() || t.getId().equals(this.tank))).orElse(false)) {
-            builder.addSlot(roleFromMode(this.mode), element.getX() - xOffset, element.getY() - yOffset)
+            builder.addSlot(roleFromMode(this.mode), element.getX() - xOffset + 1, element.getY() - yOffset + 1)
                     .setCustomRenderer(this.ingredientType, new ChemicalStackRenderer<>(this.amount, element.getWidth() - 2, element.getHeight() - 2))
                     .addIngredient(this.ingredientType, ingredient)
                     .addRichTooltipCallback((view, tooltips) -> {

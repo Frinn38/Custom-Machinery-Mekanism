@@ -33,7 +33,7 @@ public class TemperatureIngredientWrapper implements IJEIIngredientWrapper<Heat>
         if(!(element instanceof HeatGuiElement heatElement) || element.getType() != Registration.HEAT_GUI_ELEMENT.get())
             return false;
 
-        builder.addSlot(RecipeIngredientRole.INPUT, element.getX() - xOffset, element.getY() - yOffset)
+        builder.addSlot(RecipeIngredientRole.INPUT, element.getX() - xOffset + 1, element.getY() - yOffset + 1)
                 .setCustomRenderer(CMMJeiPlugin.HEAT_INGREDIENT, new HeatJEIIngredientRenderer(heatElement))
                 .addIngredient(CMMJeiPlugin.HEAT_INGREDIENT, this.ingredient)
                 .addRichTooltipCallback((view, tooltips) -> {

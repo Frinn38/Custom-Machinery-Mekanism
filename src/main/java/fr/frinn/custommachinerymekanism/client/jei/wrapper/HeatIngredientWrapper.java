@@ -10,6 +10,8 @@ import fr.frinn.custommachinerymekanism.client.jei.heat.Heat;
 import fr.frinn.custommachinerymekanism.client.jei.heat.HeatJEIIngredientRenderer;
 import fr.frinn.custommachinerymekanism.common.guielement.HeatGuiElement;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 
 public class HeatIngredientWrapper implements IJEIIngredientWrapper<Heat> {
 
@@ -26,9 +28,26 @@ public class HeatIngredientWrapper implements IJEIIngredientWrapper<Heat> {
         if(!(element instanceof HeatGuiElement heatElement) || element.getType() != Registration.HEAT_GUI_ELEMENT.get())
             return false;
 
-        builder.addSlot(roleFromMode(this.mode), element.getX() - xOffset, element.getY() - yOffset)
+        builder.addSlot(roleFromMode(this.mode), element.getX() - xOffset + 1, element.getY() - yOffset + 1)
                 .setCustomRenderer(CMMJeiPlugin.HEAT_INGREDIENT, new HeatJEIIngredientRenderer(heatElement))
-                .addIngredient(CMMJeiPlugin.HEAT_INGREDIENT, this.heat);
+                .addIngredient(CMMJeiPlugin.HEAT_INGREDIENT, this.heat)
+                .addRichTooltipCallback((slot, tooltips) -> {
+                    if(this.heat.isPerTick()) {
+                        if(this.heat.mode() == RequirementIOMode.INPUT)
+                            tooltips.add(Component.translatable("custommachinerymekanism.jei.ingredient.heat.pertick.input", this.heat.amount()));
+                        else
+                            tooltips.add(Component.translatable("custommachinerymekanism.jei.ingredient.heat.pertick.output", this.heat.amount()));
+                    } else {
+                        if(this.heat.mode() == RequirementIOMode.INPUT)
+                            tooltips.add(Component.translatable("custommachinerymekanism.jei.ingredient.heat.input", this.heat.amount()));
+                        else
+                            tooltips.add(Component.translatable("custommachinerymekanism.jei.ingredient.heat.output", this.heat.amount()));
+                    }
+                    if(this.heat.chance() == 0)
+                        tooltips.add(Component.translatable("custommachinery.jei.ingredient.chance.0").withStyle(ChatFormatting.DARK_RED));
+                    if(this.heat.chance() < 1.0D && this.heat.chance() > 0)
+                        tooltips.add(Component.translatable("custommachinery.jei.ingredient.chance", (int)(this.heat.chance() * 100)));
+                });
         return true;
     }
 }

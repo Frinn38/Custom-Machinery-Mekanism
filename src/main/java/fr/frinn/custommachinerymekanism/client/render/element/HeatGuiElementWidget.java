@@ -1,9 +1,9 @@
 package fr.frinn.custommachinerymekanism.client.render.element;
 
 import fr.frinn.custommachinery.api.guielement.IMachineScreen;
+import fr.frinn.custommachinery.client.ClientHandler;
 import fr.frinn.custommachinery.impl.guielement.TexturedGuiElementWidget;
 import fr.frinn.custommachinerymekanism.Registration;
-import fr.frinn.custommachinerymekanism.client.ClientHandler;
 import fr.frinn.custommachinerymekanism.common.guielement.HeatGuiElement;
 import mekanism.api.IIncrementalEnum;
 import mekanism.common.MekanismLang;
@@ -13,7 +13,6 @@ import mekanism.common.util.UnitDisplayUtils;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 import java.util.Collections;
@@ -33,9 +32,9 @@ public class HeatGuiElementWidget extends TexturedGuiElementWidget<HeatGuiElemen
         this.getScreen().getTile().getComponentManager().getComponent(Registration.HEAT_MACHINE_COMPONENT.get()).ifPresent(component -> {
             double fillPercent = component.getHeatFillPercent();
             int barHeight = Mth.clamp((int)(fillPercent * (double)this.height), 1, this.height - 1);
-            graphics.fill(this.getX() + 1, this.getY() + this.height - barHeight, this.getX() + this.width - 1, this.getY() + this.height - 1, FastColor.ARGB32.color(200, 255, 128, 0));
+            graphics.blit(this.getElement().getFilledTexture(), this.getX(), this.getY() + this.height - barHeight, 0, this.height - barHeight, this.width, barHeight, this.width, this.height);
         });
-        if (this.isHoveredOrFocused() && this.getElement().highlight())
+        if (this.isHovered() && this.getElement().highlight())
             ClientHandler.renderSlotHighlight(graphics, this.getX() + 1, this.getY() + 1, this.width - 2, this.height - 2);
     }
 
