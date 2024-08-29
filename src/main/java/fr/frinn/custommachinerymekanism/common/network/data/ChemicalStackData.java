@@ -1,22 +1,30 @@
 package fr.frinn.custommachinerymekanism.common.network.data;
 
+import fr.frinn.custommachinery.api.network.DataType;
 import fr.frinn.custommachinery.api.network.IData;
-import mekanism.api.chemical.Chemical;
+import fr.frinn.custommachinerymekanism.Registration;
 import mekanism.api.chemical.ChemicalStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.StreamCodec;
 
-public abstract class ChemicalStackData<C extends Chemical<C>, S extends ChemicalStack<C>> implements IData<S> {
+public class ChemicalStackData implements IData<ChemicalStack> {
 
     private final short id;
-    private final S value;
+    private final ChemicalStack value;
 
-    public ChemicalStackData(short id, S value) {
+    public ChemicalStackData(short id, ChemicalStack value) {
         this.id = id;
         this.value = value;
     }
 
-    public abstract StreamCodec<RegistryFriendlyByteBuf, S> codec();
+    public ChemicalStackData(short id, RegistryFriendlyByteBuf buf) {
+        this.id = id;
+        this.value = ChemicalStack.OPTIONAL_STREAM_CODEC.decode(buf);
+    }
+
+    @Override
+    public DataType<ChemicalStackData, ChemicalStack> getType() {
+        return Registration.CHEMICAL_DATA.get();
+    }
 
     @Override
     public short getID() {
@@ -24,13 +32,13 @@ public abstract class ChemicalStackData<C extends Chemical<C>, S extends Chemica
     }
 
     @Override
-    public S getValue() {
+    public ChemicalStack getValue() {
         return this.value;
     }
 
     @Override
     public void writeData(RegistryFriendlyByteBuf buffer) {
         IData.super.writeData(buffer);
-        this.codec().encode(buffer, this.value);
+        ChemicalStack.OPTIONAL_STREAM_CODEC.encode(buffer, this.value);
     }
 }

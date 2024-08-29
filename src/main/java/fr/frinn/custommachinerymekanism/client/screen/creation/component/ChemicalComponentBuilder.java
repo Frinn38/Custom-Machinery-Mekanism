@@ -8,11 +8,9 @@ import fr.frinn.custommachinery.client.screen.creation.MachineEditScreen;
 import fr.frinn.custommachinery.client.screen.creation.component.ComponentBuilderPopup;
 import fr.frinn.custommachinery.client.screen.creation.component.IMachineComponentBuilder;
 import fr.frinn.custommachinery.client.screen.popup.PopupScreen;
+import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent;
 import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent.Template;
-import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent.Template.Builder;
-import mekanism.api.chemical.Chemical;
-import mekanism.api.chemical.ChemicalStack;
 import mekanism.common.registries.MekanismBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -26,25 +24,27 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public record ChemicalComponentBuilder<C extends Chemical<C>, S extends ChemicalStack<C>, MC extends ChemicalMachineComponent<C, S>, T extends Template<C, S, MC>>(
-        MachineComponentType<MC> type, Builder<C, S, MC, T> builder, Component title) implements IMachineComponentBuilder<MC, T> {
+public class ChemicalComponentBuilder implements IMachineComponentBuilder<ChemicalMachineComponent, Template> {
 
     @Override
-    public PopupScreen makePopup(MachineEditScreen parent, @Nullable T template, Consumer<T> onFinish) {
-        return new ChemicalComponentBuilderPopup<>(parent, template, onFinish, this.title, this.builder);
+    public MachineComponentType<ChemicalMachineComponent> type() {
+        return Registration.CHEMICAL_MACHINE_COMPONENT.get();
     }
 
     @Override
-    public void render(GuiGraphics graphics, int x, int y, int width, int height, T template) {
+    public PopupScreen makePopup(MachineEditScreen parent, @Nullable Template template, Consumer<Template> onFinish) {
+        return new ChemicalComponentBuilderPopup(parent, template, onFinish, Component.translatable("custommachinerymekanism.gui.creation.components.chemical.title"));
+    }
+
+    @Override
+    public void render(GuiGraphics graphics, int x, int y, int width, int height, Template template) {
         graphics.renderFakeItem(MekanismBlocks.ULTIMATE_CHEMICAL_TANK.getItemStack(), x, y + height / 2 - 8);
         graphics.drawString(Minecraft.getInstance().font, "type: " + template.getType().getId().getPath(), x + 25, y + 5, 0, false);
         graphics.drawString(Minecraft.getInstance().font, "id: \"" + template.getId() + "\"", x + 25, y + 15, FastColor.ARGB32.color(255, 128, 0, 0), false);
         graphics.drawString(Minecraft.getInstance().font, "mode: " + template.mode, x + 25, y + 25, FastColor.ARGB32.color(255, 0, 0, 128), false);
     }
 
-    public static class ChemicalComponentBuilderPopup<C extends Chemical<C>, S extends ChemicalStack<C>, CM extends ChemicalMachineComponent<C, S>, T extends Template<C, S, CM>> extends ComponentBuilderPopup<T> {
-
-        private final Builder<C, S, CM, T> builder;
+    public static class ChemicalComponentBuilderPopup extends ComponentBuilderPopup<Template> {
 
         private EditBox id;
         private CycleButton<ComponentIOMode> mode;
@@ -53,14 +53,13 @@ public record ChemicalComponentBuilder<C extends Chemical<C>, S extends Chemical
         private EditBox maxOutput;
         private Checkbox unique;
 
-        public ChemicalComponentBuilderPopup(BaseScreen parent, @Nullable T template, Consumer<T> onFinish, Component title, Builder<C, S, CM, T> builder) {
+        public ChemicalComponentBuilderPopup(BaseScreen parent, @Nullable Template template, Consumer<Template> onFinish, Component title) {
             super(parent, template, onFinish, title);
-            this.builder = builder;
         }
 
         @Override
-        public T makeTemplate() {
-            return this.builder.build(this.id.getValue(), this.parseLong(this.capacity.getValue()), this.mode.getValue(), this.baseTemplate().map(template -> template.filter).orElse(Filter.empty()), this.parseLong(this.maxInput.getValue()), this.parseLong(this.maxOutput.getValue()), this.mode.getValue().getBaseConfig(), this.unique.selected());
+        public Template makeTemplate() {
+            return new Template(this.id.getValue(), this.parseLong(this.capacity.getValue()), this.mode.getValue(), this.baseTemplate().map(template -> template.filter).orElse(Filter.empty()), this.parseLong(this.maxInput.getValue()), this.parseLong(this.maxOutput.getValue()), this.mode.getValue().getBaseConfig(), this.unique.selected());
         }
 
         @Override

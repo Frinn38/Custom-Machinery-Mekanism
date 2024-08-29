@@ -1,11 +1,10 @@
 package fr.frinn.custommachinerymekanism.client.render.element;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.guielement.IMachineScreen;
 import fr.frinn.custommachinery.client.ClientHandler;
 import fr.frinn.custommachinery.impl.guielement.TexturedGuiElementWidget;
-import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent;
+import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.guielement.ChemicalGuiElement;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -25,19 +24,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class ChemicalGuiElementWidget<C extends ChemicalMachineComponent<?, ?>, E extends ChemicalGuiElement<C>> extends TexturedGuiElementWidget<E> {
+public class ChemicalGuiElementWidget extends TexturedGuiElementWidget<ChemicalGuiElement> {
 
-    public ChemicalGuiElementWidget(E element, IMachineScreen screen, Component title) {
-        super(element, screen, title);
+    public ChemicalGuiElementWidget(ChemicalGuiElement element, IMachineScreen screen) {
+        super(element, screen, Component.translatable("custommachinery.machine.guielement.chemical"));
     }
-
-    public abstract MachineComponentType<C> componentType();
 
     @Override
     public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
         super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-        this.getScreen().getTile().getComponentManager().getComponentHandler(componentType()).flatMap(gasHandler -> gasHandler.getComponentForID(this.getElement().getComponentId())).ifPresent(component -> {
-            ChemicalStack<?> stack = component.getStack();
+        this.getScreen().getTile().getComponentManager().getComponentHandler(Registration.CHEMICAL_MACHINE_COMPONENT.get()).flatMap(gasHandler -> gasHandler.getComponentForID(this.getElement().getComponentId())).ifPresent(component -> {
+            ChemicalStack stack = component.getStack();
             if(!stack.isEmpty()) {
                 RenderSystem.enableBlend();
                 int desiredHeight = MathUtils.clampToInt((double)(this.height - 2) * (double)stack.getAmount() / (double)component.getCapacity());
@@ -49,7 +46,7 @@ public abstract class ChemicalGuiElementWidget<C extends ChemicalMachineComponen
                     desiredHeight = this.height;
                 }
 
-                Chemical<?> chemical = stack.getChemical();
+                Chemical chemical = stack.getChemical();
                 MekanismRenderer.color(graphics, chemical);
                 GuiUtils.drawTiledSprite(graphics, this.getX() + 1, this.getY() + 1, this.height - 2, this.width - 2, desiredHeight, MekanismRenderer.getSprite(chemical.getIcon()), 16, 16, 100, TilingDirection.UP_RIGHT, false);
                 MekanismRenderer.resetColor(graphics);
@@ -63,10 +60,10 @@ public abstract class ChemicalGuiElementWidget<C extends ChemicalMachineComponen
     @Override
     public List<Component> getTooltips() {
         return this.getScreen().getTile().getComponentManager()
-                .getComponentHandler(componentType())
+                .getComponentHandler(Registration.CHEMICAL_MACHINE_COMPONENT.get())
                 .flatMap(gasHandler -> gasHandler.getComponentForID(this.getElement().getComponentId()))
                 .map(component -> {
-                    ChemicalStack<?> stack = component.getStack();
+                    ChemicalStack stack = component.getStack();
                     List<Component> tooltips = new ArrayList<>();
                     tooltips.add(TextComponentUtil.build(stack));
                     tooltips.add(MekanismLang.GENERIC_MB.translateColored(EnumColor.GRAY, TextUtils.format(stack.getAmount())));

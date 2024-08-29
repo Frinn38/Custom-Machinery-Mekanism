@@ -8,8 +8,8 @@ import fr.frinn.custommachinery.client.screen.creation.gui.IGuiElementBuilder;
 import fr.frinn.custommachinery.client.screen.creation.gui.MutableProperties;
 import fr.frinn.custommachinery.client.screen.popup.PopupScreen;
 import fr.frinn.custommachinery.impl.guielement.AbstractGuiElement.Properties;
+import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.guielement.ChemicalGuiElement;
-import fr.frinn.custommachinerymekanism.common.guielement.ChemicalGuiElement.Builder;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.GridLayout.RowHelper;
@@ -18,36 +18,37 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
 
-public record ChemicalGuiElementBuilder<E extends ChemicalGuiElement<?>>(
-        GuiElementType<E> type, Builder<E> builder) implements IGuiElementBuilder<E> {
+public class ChemicalGuiElementBuilder implements IGuiElementBuilder<ChemicalGuiElement> {
 
     @Override
-    public E make(Properties properties, @Nullable E from) {
+    public GuiElementType<ChemicalGuiElement> type() {
+        return Registration.CHEMICAL_GUI_ELEMENT.get();
+    }
+
+    @Override
+    public ChemicalGuiElement make(Properties properties, @Nullable ChemicalGuiElement from) {
         if(from != null)
-            return this.builder.build(properties, from.highlight());
+            return new ChemicalGuiElement(properties, from.highlight());
         else
-            return this.builder.build(properties, true);
+            return new ChemicalGuiElement(properties, true);
     }
 
     @Override
-    public PopupScreen makeConfigPopup(MachineEditScreen parent, MutableProperties properties, @Nullable E from, Consumer<E> onFinish) {
-        return new ChemicalGuiElementBuilderPopup<>(parent, properties, from, onFinish, this.builder);
+    public PopupScreen makeConfigPopup(MachineEditScreen parent, MutableProperties properties, @Nullable ChemicalGuiElement from, Consumer<ChemicalGuiElement> onFinish) {
+        return new ChemicalGuiElementBuilderPopup(parent, properties, from, onFinish);
     }
 
-    public static class ChemicalGuiElementBuilderPopup<E extends ChemicalGuiElement<?>> extends GuiElementBuilderPopup<E> {
-
-        private final Builder<E> builder;
+    public static class ChemicalGuiElementBuilderPopup extends GuiElementBuilderPopup<ChemicalGuiElement> {
 
         private Checkbox highlight;
 
-        public ChemicalGuiElementBuilderPopup(BaseScreen parent, MutableProperties properties, @Nullable E from, Consumer<E> onFinish, Builder<E> builder) {
+        public ChemicalGuiElementBuilderPopup(BaseScreen parent, MutableProperties properties, @Nullable ChemicalGuiElement from, Consumer<ChemicalGuiElement> onFinish) {
             super(parent, properties, from, onFinish);
-            this.builder = builder;
         }
 
         @Override
-        public E makeElement() {
-            return this.builder.build(this.properties.build(), this.highlight.selected());
+        public ChemicalGuiElement makeElement() {
+            return new ChemicalGuiElement(this.properties.build(), this.highlight.selected());
         }
 
         @Override

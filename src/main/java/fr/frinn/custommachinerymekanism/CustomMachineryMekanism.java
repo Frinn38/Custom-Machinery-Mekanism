@@ -1,14 +1,8 @@
 package fr.frinn.custommachinerymekanism;
 
 import fr.frinn.custommachinery.common.init.CustomMachineTile;
-import fr.frinn.custommachinerymekanism.common.component.handler.GasComponentHandler;
-import fr.frinn.custommachinerymekanism.common.component.handler.InfusionComponentHandler;
-import fr.frinn.custommachinerymekanism.common.component.handler.PigmentComponentHandler;
-import fr.frinn.custommachinerymekanism.common.component.handler.SlurryComponentHandler;
-import mekanism.api.chemical.gas.IGasHandler;
-import mekanism.api.chemical.infuse.IInfusionHandler;
-import mekanism.api.chemical.pigment.IPigmentHandler;
-import mekanism.api.chemical.slurry.ISlurryHandler;
+import fr.frinn.custommachinerymekanism.common.component.handler.ChemicalComponentHandler;
+import mekanism.api.chemical.IChemicalHandler;
 import mekanism.api.heat.IHeatHandler;
 import mekanism.common.capabilities.Capabilities;
 import net.minecraft.core.Direction;
@@ -34,42 +28,12 @@ public class CustomMachineryMekanism {
 
     private void attachCapabilities(final RegisterCapabilitiesEvent event) {
         //GAS
-        event.registerBlockEntity(Capabilities.GAS.block(), fr.frinn.custommachinery.common.init.Registration.CUSTOM_MACHINE_TILE.get(), new ICapabilityProvider<>() {
+        event.registerBlockEntity(Capabilities.CHEMICAL.block(), fr.frinn.custommachinery.common.init.Registration.CUSTOM_MACHINE_TILE.get(), new ICapabilityProvider<>() {
             @Nullable
             @Override
-            public IGasHandler getCapability(CustomMachineTile machine, Direction side) {
-                return machine.getComponentManager().getComponentHandler(Registration.GAS_MACHINE_COMPONENT.get())
-                        .map(handler -> ((GasComponentHandler)handler).getSidedHandler(side))
-                        .orElse(null);
-            }
-        });
-        //INFUSION
-        event.registerBlockEntity(Capabilities.INFUSION.block(), fr.frinn.custommachinery.common.init.Registration.CUSTOM_MACHINE_TILE.get(), new ICapabilityProvider<>() {
-            @Nullable
-            @Override
-            public IInfusionHandler getCapability(CustomMachineTile machine, Direction side) {
-                return machine.getComponentManager().getComponentHandler(Registration.INFUSION_MACHINE_COMPONENT.get())
-                        .map(handler -> ((InfusionComponentHandler)handler).getSidedHandler(side))
-                        .orElse(null);
-            }
-        });
-        //PIGMENT
-        event.registerBlockEntity(Capabilities.PIGMENT.block(), fr.frinn.custommachinery.common.init.Registration.CUSTOM_MACHINE_TILE.get(), new ICapabilityProvider<>() {
-            @Nullable
-            @Override
-            public IPigmentHandler getCapability(CustomMachineTile machine, Direction side) {
-                return machine.getComponentManager().getComponentHandler(Registration.PIGMENT_MACHINE_COMPONENT.get())
-                        .map(handler -> ((PigmentComponentHandler)handler).getSidedHandler(side))
-                        .orElse(null);
-            }
-        });
-        //SLURRY
-        event.registerBlockEntity(Capabilities.SLURRY.block(), fr.frinn.custommachinery.common.init.Registration.CUSTOM_MACHINE_TILE.get(), new ICapabilityProvider<>() {
-            @Nullable
-            @Override
-            public ISlurryHandler getCapability(CustomMachineTile machine, Direction side) {
-                return machine.getComponentManager().getComponentHandler(Registration.SLURRY_MACHINE_COMPONENT.get())
-                        .map(handler -> ((SlurryComponentHandler)handler).getSidedHandler(side))
+            public IChemicalHandler getCapability(CustomMachineTile machine, Direction side) {
+                return machine.getComponentManager().getComponentHandler(Registration.CHEMICAL_MACHINE_COMPONENT.get())
+                        .map(handler -> ((ChemicalComponentHandler)handler).getSidedHandler(side))
                         .orElse(null);
             }
         });

@@ -1,5 +1,7 @@
 package fr.frinn.custommachinerymekanism.common.integration.kubejs;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 import dev.latvian.mods.kubejs.error.KubeRuntimeException;
 import dev.latvian.mods.kubejs.plugin.KubeJSPlugin;
@@ -12,15 +14,10 @@ import fr.frinn.custommachinery.api.codec.NamedCodec;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
-import mekanism.api.chemical.gas.GasStack;
-import mekanism.api.chemical.infuse.InfusionStack;
-import mekanism.api.chemical.pigment.PigmentStack;
-import mekanism.api.chemical.slurry.SlurryStack;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import net.minecraft.resources.ResourceLocation;
-
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import net.minecraft.util.Mth;
+import net.neoforged.neoforge.fluids.FluidType;
 
 public class CustomMachineryMekanismKubeJSPlugin implements KubeJSPlugin {
 
@@ -28,49 +25,64 @@ public class CustomMachineryMekanismKubeJSPlugin implements KubeJSPlugin {
 
     @Override
     public void registerTypeWrappers(final TypeWrapperRegistry registry) {
-        registry.register(GasStack.class, (ContextFromFunction<GasStack>) (ctx, o) -> of(o, MekanismAPI.EMPTY_GAS, GasStack.EMPTY, MekanismAPI.GAS_REGISTRY::get, GasStack::new));
-        registry.register(InfusionStack.class, (ContextFromFunction<InfusionStack>) (ctx, o) -> of(o, MekanismAPI.EMPTY_INFUSE_TYPE, InfusionStack.EMPTY, MekanismAPI.INFUSE_TYPE_REGISTRY::get, InfusionStack::new));
-        registry.register(PigmentStack.class, (ContextFromFunction<PigmentStack>) (ctx, o) -> of(o, MekanismAPI.EMPTY_PIGMENT, PigmentStack.EMPTY, MekanismAPI.PIGMENT_REGISTRY::get, PigmentStack::new));
-        registry.register(SlurryStack.class, (ContextFromFunction<SlurryStack>) (ctx, o) -> of(o, MekanismAPI.EMPTY_SLURRY, SlurryStack.EMPTY, MekanismAPI.SLURRY_REGISTRY::get, SlurryStack::new));
+        registry.register(ChemicalStack.class, (ContextFromFunction<ChemicalStack>) (ctx, o) -> of(o));
         registry.register(TemperatureUnit.class, (TypeWrapperFactory<TemperatureUnit>) TypeInfo.of(TemperatureUnit.class));
     }
 
-    @SuppressWarnings("unchecked")
-    private static <C extends Chemical<C>, S extends ChemicalStack<C>> S of(Object o, C air, S empty, Function<ResourceLocation, C> getter, BiFunction<C, Long, S> maker) {
-        final long BASE_AMOUNT = 1000L;
+    private static ChemicalStack of(Object o) {
+        final long BASE_AMOUNT = FluidType.BUCKET_VOLUME;
 
         if(o instanceof Wrapper w)
             o = w.unwrap();
 
-        if(o == null || o == empty)
-            return empty;
-        else if(o.getClass().isInstance(empty.getClass()))
-            return (S)o;
-        else if (o.getClass().isInstance(air.getClass()) && o != air) {
-            return maker.apply((C)o, BASE_AMOUNT);
+        if(o == null || o == ChemicalStack.EMPTY)
+            return ChemicalStack.EMPTY;
+        else if(o instanceof ChemicalStack stack)
+            return stack;
+        else if (o instanceof Chemical chemical) {
+            return new ChemicalStack(chemical, BASE_AMOUNT);
         } else if(o instanceof ResourceLocation loc) {
-            C chemical = getter.apply(loc);
-            if(chemical == air)
+            Chemical chemical = MekanismAPI.CHEMICAL_REGISTRY.get(loc);
+            if(chemical == MekanismAPI.EMPTY_CHEMICAL)
                 throw new KubeRuntimeException("Chemical " + loc + " not found!");
-            return maker.apply(chemical, BASE_AMOUNT);
-        } else if (o instanceof CharSequence) {
-            String s = o.toString().trim();
-            long amount = BASE_AMOUNT;
+            return new ChemicalStack(chemical, BASE_AMOUNT);
+        } else {
+            try {
+                var reader = new StringReader(o.toString());
+                reader.skipWhitespace();
 
-            if (s.isEmpty() || s.equals("-") || s.equals("empty")) {
-                return empty;
+                if (!reader.canRead() || reader.peek() == '-')
+                    return ChemicalStack.EMPTY;
+
+                long amount = BASE_AMOUNT;
+                if(StringReader.isAllowedNumber(reader.peek())) {
+                    double amountd = reader.readDouble();
+                    reader.skipWhitespace();
+
+                    if (reader.peek() == 'b' || reader.peek() == 'B') {
+                        reader.skip();
+                        reader.skipWhitespace();
+                        amountd *= FluidType.BUCKET_VOLUME;
+                    }
+
+                    if (reader.peek() == '/') {
+                        reader.skip();
+                        reader.skipWhitespace();
+                        amountd = amountd / reader.readDouble();
+                    }
+
+                    amount = Mth.ceil(amountd);
+                    reader.expect('x');
+                    reader.skipWhitespace();
+
+                    if (amount < 1)
+                        throw new IllegalArgumentException("Fluid amount smaller than 1 is not allowed!");
+                }
+                ResourceLocation chemicalId = ResourceLocation.read(reader);
+                return new ChemicalStack(MekanismAPI.CHEMICAL_REGISTRY.get(chemicalId), amount);
+            } catch (CommandSyntaxException ex) {
+                throw new RuntimeException(ex);
             }
-
-            String[] s1 = s.split(" ", 2);
-            if(s1.length == 2)
-                amount = Long.parseLong(s1[1]);
-
-            C chemical = getter.apply(ResourceLocation.parse(s1[0]));
-            if(chemical == air)
-                throw new KubeRuntimeException("Chemical " + s1[0] + " not found!");
-            return maker.apply(chemical, amount);
         }
-
-        return empty;
     }
 }
