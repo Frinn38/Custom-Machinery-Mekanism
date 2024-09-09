@@ -154,7 +154,7 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
         container.accept(DataType.createSyncable(SideConfig.class, this::getConfig, this.config::set));
     }
 
-    public static class Template implements IMachineComponentTemplate<ChemicalMachineComponent> {
+    public record Template(String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) implements IMachineComponentTemplate<ChemicalMachineComponent> {
 
         public static NamedCodec<Template> CODEC = NamedCodec.record(templateInstance ->
                 templateInstance.group(
@@ -170,26 +170,6 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
                         new Template(id, capacity, mode, filter, maxInput.orElse(capacity), maxOutput.orElse(capacity), config.orElse(mode.getBaseConfig()), unique)
                 ), "Chemical machine component"
         );
-
-        public final String id;
-        public final long capacity;
-        public final ComponentIOMode mode;
-        public final Filter<Chemical> filter;
-        public final long maxInput;
-        public final long maxOutput;
-        public final SideConfig.Template config;
-        public final boolean unique;
-
-        public Template(String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
-            this.id = id;
-            this.capacity = capacity;
-            this.mode = mode;
-            this.filter = filter;
-            this.maxInput = maxInput;
-            this.maxOutput = maxOutput;
-            this.config = config;
-            this.unique = unique;
-        }
 
         @Override
         public MachineComponentType<ChemicalMachineComponent> getType() {

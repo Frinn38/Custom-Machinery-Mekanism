@@ -41,7 +41,7 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
         graphics.renderFakeItem(MekanismBlocks.ULTIMATE_CHEMICAL_TANK.getItemStack(), x, y + height / 2 - 8);
         graphics.drawString(Minecraft.getInstance().font, "type: " + template.getType().getId().getPath(), x + 25, y + 5, 0, false);
         graphics.drawString(Minecraft.getInstance().font, "id: \"" + template.getId() + "\"", x + 25, y + 15, FastColor.ARGB32.color(255, 128, 0, 0), false);
-        graphics.drawString(Minecraft.getInstance().font, "mode: " + template.mode, x + 25, y + 25, FastColor.ARGB32.color(255, 0, 0, 128), false);
+        graphics.drawString(Minecraft.getInstance().font, "mode: " + template.mode(), x + 25, y + 25, FastColor.ARGB32.color(255, 0, 0, 128), false);
     }
 
     public static class ChemicalComponentBuilderPopup extends ComponentBuilderPopup<Template> {
@@ -59,7 +59,7 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
 
         @Override
         public Template makeTemplate() {
-            return new Template(this.id.getValue(), this.parseLong(this.capacity.getValue()), this.mode.getValue(), this.baseTemplate().map(template -> template.filter).orElse(Filter.empty()), this.parseLong(this.maxInput.getValue()), this.parseLong(this.maxOutput.getValue()), this.mode.getValue().getBaseConfig(), this.unique.selected());
+            return new Template(this.id.getValue(), this.parseLong(this.capacity.getValue()), this.mode.getValue(), this.baseTemplate().map(Template::filter).orElse(Filter.empty()), this.parseLong(this.maxInput.getValue()), this.parseLong(this.maxOutput.getValue()), this.mode.getValue().getBaseConfig(), this.unique.selected());
         }
 
         @Override
@@ -73,26 +73,26 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
 
             //Mode
             this.mode = this.propertyList.add(Component.translatable("custommachinery.gui.creation.components.mode"), CycleButton.builder(ComponentIOMode::toComponent).displayOnlyValue().withValues(ComponentIOMode.values()).withInitialValue(ComponentIOMode.BOTH).create(0, 0, 180, 20, Component.translatable("custommachinery.gui.creation.components.mode")));
-            this.baseTemplate().ifPresent(template -> this.mode.setValue(template.mode));
+            this.baseTemplate().ifPresent(template -> this.mode.setValue(template.mode()));
 
             //Capacity
             this.capacity = this.propertyList.add(Component.translatable("custommachinery.gui.creation.components.capacity"), new EditBox(this.font, 0, 0, 180, 20, Component.translatable("custommachinery.gui.creation.components.capacity")));
             this.capacity.setFilter(this::checkLong);
-            this.baseTemplate().ifPresentOrElse(template -> this.capacity.setValue("" + template.capacity), () -> this.capacity.setValue("10000"));
+            this.baseTemplate().ifPresentOrElse(template -> this.capacity.setValue("" + template.capacity()), () -> this.capacity.setValue("10000"));
 
             //Max input
             this.maxInput = this.propertyList.add(Component.translatable("custommachinery.gui.creation.components.maxInput"), new EditBox(this.font, 0, 0, 180, 20, Component.translatable("custommachinery.gui.creation.components.maxInput")));
             this.maxInput.setFilter(this::checkLong);
-            this.baseTemplate().ifPresentOrElse(template -> this.maxInput.setValue("" + template.maxInput), () -> this.maxInput.setValue("10000"));
+            this.baseTemplate().ifPresentOrElse(template -> this.maxInput.setValue("" + template.maxInput()), () -> this.maxInput.setValue("10000"));
 
             //Max output
             this.maxOutput = this.propertyList.add(Component.translatable("custommachinery.gui.creation.components.maxOutput"), new EditBox(this.font, 0, 0, 180, 20, Component.translatable("custommachinery.gui.creation.components.maxOutput")));
             this.maxOutput.setFilter(this::checkLong);
-            this.baseTemplate().ifPresentOrElse(template -> this.maxOutput.setValue("" + template.maxOutput), () -> this.maxOutput.setValue("10000"));
+            this.baseTemplate().ifPresentOrElse(template -> this.maxOutput.setValue("" + template.maxOutput()), () -> this.maxOutput.setValue("10000"));
 
             //Unique
             this.unique = this.propertyList.add(Component.translatable("custommachinery.gui.creation.components.fluid.unique"), Checkbox.builder(Component.translatable("custommachinery.gui.creation.components.fluid.unique"), this.font).selected(false).build());
-            if(this.baseTemplate().map(template -> template.unique).orElse(false) != this.unique.selected())
+            if(this.baseTemplate().map(Template::unique).orElse(false) != this.unique.selected())
                 this.unique.onPress();
         }
     }

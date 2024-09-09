@@ -17,6 +17,7 @@ import mekanism.api.chemical.ChemicalStack;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.neoforged.fml.ModList;
 import net.neoforged.neoforge.fluids.FluidType;
 
 public class CustomMachineryMekanismKubeJSPlugin implements KubeJSPlugin {
@@ -25,7 +26,8 @@ public class CustomMachineryMekanismKubeJSPlugin implements KubeJSPlugin {
 
     @Override
     public void registerTypeWrappers(final TypeWrapperRegistry registry) {
-        registry.register(ChemicalStack.class, (ContextFromFunction<ChemicalStack>) (ctx, o) -> of(o));
+        if(!ModList.get().isLoaded("kubejs_mekanism"))
+            registry.register(ChemicalStack.class, (ContextFromFunction<ChemicalStack>) (ctx, o) -> of(o));
         registry.register(TemperatureUnit.class, (TypeWrapperFactory<TemperatureUnit>) TypeInfo.of(TemperatureUnit.class));
     }
 
