@@ -1,0 +1,36 @@
+{
+    "custommachinerymekanism.requirements.chemical.error.input": "不够 %s，需要 %smB！",
+    "custommachinerymekanism.requirements.chemical.error.output": "没有足够空间存储 %smb 的 %s ！",
+    "custommachinerymekanism.requirements.heat.error.input": "存储的热量不足，需要 %s，但已找到 %s！",
+    "custommachinerymekanism.requirements.temp.error": "所需温度：%s",
+    "custommachinerymekanism.requirements.radiation.error": "辐射不足：%s，需要 %s！",
+    "custommachinerymekanism.requirements.radiation.info.input": "移除 %s，在 %s 个方块半径的范围内",
+    "custommachinerymekanism.requirements.radiation.info.output": "发射 %s",
+    "custommachinerymekanism.requirements.radiation.info.tick.input": "移除 %s/t，在 %s 个方块半径的范围内",
+    "custommachinerymekanism.requirements.radiation.info.tick.output": "发射 %s/t",
+  
+    "custommachinerymekanism.gui.creation.components.heat.title": "热量成分",
+    "custommachinerymekanism.gui.creation.components.heat.capacity": "容量",
+    "custommachinerymekanism.gui.creation.components.heat.capacity.tooltip": "机器可处理的最高温度（绝对温标）",
+    "custommachinerymekanism.gui.creation.components.heat.base": "基础温度",
+    "custommachinerymekanism.gui.creation.components.heat.base.tooltip": "机器在没有提供热量时的温度（绝对温标）",
+    "custommachinerymekanism.gui.creation.components.heat.conduction": "传导",
+    "custommachinerymekanism.gui.creation.components.heat.conduction.tooltip": "决定可以插入或提取多少热量的系数（数值越大，提取的热量越多，插入的热量越少）",
+    "custommachinerymekanism.gui.creation.components.heat.insulation": "隔热",
+    "custommachinerymekanism.gui.creation.components.heat.insulation.tooltip": "决定有多少热量会散失到环境中（损失）的系数\n数值越高，热量损失越少",
+    "custommachinerymekanism.gui.creation.components.chemical.title": "化学组件",
+  
+    "custommachinerymekanism.jei.ingredient.heat": "热量:  %s",
+    "custommachinerymekanism.jei.ingredient.heat.input": "消耗 %s 热量",
+    "custommachinerymekanism.jei.ingredient.heat.output": "产生 %s 热量",
+    "custommachinerymekanism.jei.ingredient.heat.pertick.input": "消耗 %sHeat/t",
+    "custommachinerymekanism.jei.ingredient.heat.pertick.output": "产生 %sHeat/t",
+  
+    "custommachinery.machine.component.heat": "热量",
+    "custommachinery.machine.component.chemical": "化学",
+    "custommachinery.machine.component.radiation": "辐射",
+  
+    "custommachinery.machine.guielement.heat": "热量",
+    "custommachinery.machine.guielement.chemical": "化学",
+    "custommachinery.machine.guielement.radiation": "辐射"
+  }
