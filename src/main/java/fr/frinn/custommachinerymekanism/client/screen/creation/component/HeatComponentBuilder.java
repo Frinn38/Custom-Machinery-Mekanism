@@ -1,13 +1,14 @@
 package fr.frinn.custommachinerymekanism.client.screen.creation.component;
 
-import fr.frinn.custommachinery.api.component.ComponentIOMode;
 import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.client.screen.BaseScreen;
 import fr.frinn.custommachinery.client.screen.creation.MachineEditScreen;
 import fr.frinn.custommachinery.client.screen.creation.component.ComponentBuilderPopup;
+import fr.frinn.custommachinery.client.screen.creation.component.ComponentConfigBuilderWidget;
 import fr.frinn.custommachinery.client.screen.creation.component.IMachineComponentBuilder;
 import fr.frinn.custommachinery.client.screen.popup.PopupScreen;
 import fr.frinn.custommachinery.client.screen.widget.DoubleSlider;
+import fr.frinn.custommachinery.impl.component.config.ToggleSideConfig;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.HeatMachineComponent;
 import fr.frinn.custommachinerymekanism.common.component.HeatMachineComponent.Template;
@@ -44,6 +45,7 @@ public class HeatComponentBuilder implements IMachineComponentBuilder<HeatMachin
         private DoubleSlider baseTemp;
         private DoubleSlider conduction;
         private DoubleSlider insulation;
+        private ToggleSideConfig.Template config;
 
         public HeatComponentBuilderPopup(BaseScreen parent, @Nullable Template template, Consumer<Template> onFinish, Component title) {
             super(parent, template, onFinish, title);
@@ -51,7 +53,7 @@ public class HeatComponentBuilder implements IMachineComponentBuilder<HeatMachin
 
         @Override
         public Template makeTemplate() {
-            return new Template(this.capacity.doubleValue(), this.baseTemp.doubleValue(), this.conduction.doubleValue(), this.insulation.doubleValue(), ComponentIOMode.INPUT.getBaseConfig());
+            return new Template(this.capacity.doubleValue(), this.baseTemp.doubleValue(), this.conduction.doubleValue(), this.insulation.doubleValue(), this.config);
         }
 
         @Override
@@ -73,6 +75,10 @@ public class HeatComponentBuilder implements IMachineComponentBuilder<HeatMachin
             //Insulation
             this.insulation = this.propertyList.add(Component.translatable("custommachinerymekanism.gui.creation.components.heat.insulation"), DoubleSlider.builder().bounds(0.0D, 10.0D).defaultValue(this.baseTemplate().map(Template::inverseInsulationCoefficient).orElse(0.0D)).displayOnlyValue().create(0, 0, 140, 20, Component.translatable("custommachinerymekanism.gui.creation.components.heat.insulation")));
             this.insulation.setTooltip(Tooltip.create(Component.translatable("custommachinerymekanism.gui.creation.components.heat.insulation.tooltip")));
+
+            //Config
+            this.baseTemplate().ifPresentOrElse(template -> this.config = template.config(), () -> this.config = ToggleSideConfig.Template.DEFAULT_ALL_ENABLED);
+            this.propertyList.add(Component.translatable("custommachinery.gui.config.component"), ComponentConfigBuilderWidget.make(0, 0, 180, 20, Component.translatable("custommachinery.gui.config.component"), this.parent, () -> this.config, template -> this.config = template));
         }
     }
 }

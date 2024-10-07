@@ -21,8 +21,15 @@ public class HeatIngredientHelper implements IIngredientHelper<Heat> {
         return Component.translatable("custommachinerymekanism.jei.ingredient.heat", ingredient.amount()).getString();
     }
 
+    //Safe to remove
+    @SuppressWarnings("removal")
     @Override
     public String getUniqueId(Heat ingredient, UidContext context) {
+        return "" + ingredient.amount() + ingredient.chance() + ingredient.isPerTick();
+    }
+
+    @Override
+    public Object getUid(Heat ingredient, UidContext context) {
         return "" + ingredient.amount() + ingredient.chance() + ingredient.isPerTick();
     }
 

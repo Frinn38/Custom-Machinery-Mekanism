@@ -6,8 +6,10 @@ import fr.frinn.custommachinery.api.utils.Filter;
 import fr.frinn.custommachinery.client.screen.BaseScreen;
 import fr.frinn.custommachinery.client.screen.creation.MachineEditScreen;
 import fr.frinn.custommachinery.client.screen.creation.component.ComponentBuilderPopup;
+import fr.frinn.custommachinery.client.screen.creation.component.ComponentConfigBuilderWidget;
 import fr.frinn.custommachinery.client.screen.creation.component.IMachineComponentBuilder;
 import fr.frinn.custommachinery.client.screen.popup.PopupScreen;
+import fr.frinn.custommachinery.impl.component.config.IOSideConfig;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent;
 import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent.Template;
@@ -52,6 +54,7 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
         private EditBox maxInput;
         private EditBox maxOutput;
         private Checkbox unique;
+        private IOSideConfig.Template config;
 
         public ChemicalComponentBuilderPopup(BaseScreen parent, @Nullable Template template, Consumer<Template> onFinish, Component title) {
             super(parent, template, onFinish, title);
@@ -59,7 +62,7 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
 
         @Override
         public Template makeTemplate() {
-            return new Template(this.id.getValue(), this.parseLong(this.capacity.getValue()), this.mode.getValue(), this.baseTemplate().map(Template::filter).orElse(Filter.empty()), this.parseLong(this.maxInput.getValue()), this.parseLong(this.maxOutput.getValue()), this.mode.getValue().getBaseConfig(), this.unique.selected());
+            return new Template(this.id.getValue(), this.parseLong(this.capacity.getValue()), this.mode.getValue(), this.baseTemplate().map(Template::filter).orElse(Filter.empty()), this.parseLong(this.maxInput.getValue()), this.parseLong(this.maxOutput.getValue()), this.config, this.unique.selected());
         }
 
         @Override
@@ -94,6 +97,10 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
             this.unique = this.propertyList.add(Component.translatable("custommachinery.gui.creation.components.fluid.unique"), Checkbox.builder(Component.translatable("custommachinery.gui.creation.components.fluid.unique"), this.font).selected(false).build());
             if(this.baseTemplate().map(Template::unique).orElse(false) != this.unique.selected())
                 this.unique.onPress();
+
+            //Config
+            this.baseTemplate().ifPresentOrElse(template -> this.config = template.config(), () -> this.config = IOSideConfig.Template.DEFAULT_ALL_INPUT);
+            this.propertyList.add(Component.translatable("custommachinery.gui.config.component"), ComponentConfigBuilderWidget.make(0, 0, 180, 20, Component.translatable("custommachinery.gui.config.component"), this.parent, () -> this.config, template -> this.config = template));
         }
     }
 }

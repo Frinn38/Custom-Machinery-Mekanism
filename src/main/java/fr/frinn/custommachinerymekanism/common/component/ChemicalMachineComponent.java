@@ -14,7 +14,7 @@ import fr.frinn.custommachinery.api.network.ISyncableStuff;
 import fr.frinn.custommachinery.api.utils.Filter;
 import fr.frinn.custommachinery.impl.codec.DefaultCodecs;
 import fr.frinn.custommachinery.impl.component.AbstractMachineComponent;
-import fr.frinn.custommachinery.impl.component.config.SideConfig;
+import fr.frinn.custommachinery.impl.component.config.IOSideConfig;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.network.syncable.ChemicalStackSyncable;
 import mekanism.api.Action;
@@ -36,12 +36,12 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
     private final Filter<Chemical> filter;
     private final long maxInput;
     private final long maxOutput;
-    private final SideConfig config;
+    private final IOSideConfig config;
     private final boolean unique;
 
     private ChemicalStack stack = ChemicalStack.EMPTY;
 
-    public ChemicalMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) {
+    public ChemicalMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, IOSideConfig.Template config, boolean unique) {
         super(manager, mode);
         this.id = id;
         this.capacity = capacity;
@@ -144,17 +144,17 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
     }
 
     @Override
-    public SideConfig getConfig() {
+    public IOSideConfig getConfig() {
         return this.config;
     }
 
     @Override
     public void getStuffToSync(Consumer<ISyncable<?, ?>> container) {
         container.accept(ChemicalStackSyncable.create(this::getStack, this::setStack));
-        container.accept(DataType.createSyncable(SideConfig.class, this::getConfig, this.config::set));
+        container.accept(DataType.createSyncable(IOSideConfig.class, this::getConfig, this.config::set));
     }
 
-    public record Template(String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, SideConfig.Template config, boolean unique) implements IMachineComponentTemplate<ChemicalMachineComponent> {
+    public record Template(String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, IOSideConfig.Template config, boolean unique) implements IMachineComponentTemplate<ChemicalMachineComponent> {
 
         public static NamedCodec<Template> CODEC = NamedCodec.record(templateInstance ->
                 templateInstance.group(
@@ -164,7 +164,7 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
                         Filter.codec(DefaultCodecs.registryValueOrTag(MekanismAPI.CHEMICAL_REGISTRY)).orElse(Filter.empty()).forGetter(template -> template.filter),
                         NamedCodec.LONG.optionalFieldOf("max_input").forGetter(template -> template.maxInput == template.capacity ? Optional.empty() : Optional.of(template.maxInput)),
                         NamedCodec.LONG.optionalFieldOf("max_output").forGetter(template -> template.maxOutput == template.capacity ? Optional.empty() : Optional.of(template.maxOutput)),
-                        SideConfig.Template.CODEC.optionalFieldOf("config").forGetter(template -> template.config == template.mode.getBaseConfig() ? Optional.empty() : Optional.of(template.config)),
+                        IOSideConfig.Template.CODEC.optionalFieldOf("config").forGetter(template -> template.config == template.mode.getBaseConfig() ? Optional.empty() : Optional.of(template.config)),
                         NamedCodec.BOOL.optionalFieldOf("unique", false).forGetter(template -> template.unique)
                 ).apply(templateInstance, (id, capacity, mode, filter, maxInput, maxOutput, config, unique) ->
                         new Template(id, capacity, mode, filter, maxInput.orElse(capacity), maxOutput.orElse(capacity), config.orElse(mode.getBaseConfig()), unique)

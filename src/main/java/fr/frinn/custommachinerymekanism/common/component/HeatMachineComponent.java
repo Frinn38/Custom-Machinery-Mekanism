@@ -15,8 +15,8 @@ import fr.frinn.custommachinery.api.network.ISyncable;
 import fr.frinn.custommachinery.api.network.ISyncableStuff;
 import fr.frinn.custommachinery.impl.component.AbstractMachineComponent;
 import fr.frinn.custommachinery.impl.component.config.RelativeSide;
-import fr.frinn.custommachinery.impl.component.config.SideConfig;
-import fr.frinn.custommachinery.impl.component.config.SideMode;
+import fr.frinn.custommachinery.impl.component.config.ToggleSideConfig;
+import fr.frinn.custommachinery.impl.component.config.ToggleSideMode;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.client.jei.heat.Heat;
 import mekanism.api.heat.HeatAPI.HeatTransfer;
@@ -44,12 +44,12 @@ import java.util.function.Consumer;
 public class HeatMachineComponent extends AbstractMachineComponent implements ISideConfigComponent, ITileHeatHandler, ISerializableComponent, ISyncableStuff, ITickableComponent, IDumpComponent {
 
     private final double baseTemp;
-    private final SideConfig config;
+    private final ToggleSideConfig config;
     private final BasicHeatCapacitor capacitor;
     private final Map<Direction, BlockCapabilityCache<IHeatHandler, Direction>> neighbours = Maps.newEnumMap(Direction.class);
     private double lastEnvironmentalLoss;
 
-    public HeatMachineComponent(IMachineComponentManager manager, double capacity, double baseTemp, double inverseConductionCoefficient, double inverseInsulationCoefficient, SideConfig.Template config) {
+    public HeatMachineComponent(IMachineComponentManager manager, double capacity, double baseTemp, double inverseConductionCoefficient, double inverseInsulationCoefficient, ToggleSideConfig.Template config) {
         super(manager, ComponentIOMode.BOTH);
         this.baseTemp = baseTemp;
         this.config = config.build(this);
@@ -63,7 +63,7 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
     }
 
     @Override
-    public SideConfig getConfig() {
+    public ToggleSideConfig getConfig() {
         return this.config;
     }
 
@@ -93,8 +93,8 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
         return (this.capacitor.getTemperature() - this.baseTemp) / this.capacitor.getHeatCapacity();
     }
 
-    private void onConfigChange(RelativeSide side, SideMode old, SideMode now) {
-        if(old.isNone())
+    private void onConfigChange(RelativeSide side, ToggleSideMode old, ToggleSideMode now) {
+        if(old.isDisabled())
             this.getManager().getLevel().updateNeighborsAt(this.getManager().getTile().getBlockPos(), this.getManager().getTile().getBlockState().getBlock());
     }
 
@@ -118,7 +118,7 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
 
     @Nullable
     public IHeatHandler getHeatHandler(@Nullable Direction side) {
-        if(!this.config.getSideMode(side).isNone())
+        if(!this.config.getSideMode(side).isDisabled())
             return this;
         return null;
     }
@@ -126,17 +126,20 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
     @Override
     public void serialize(CompoundTag nbt, HolderLookup.Provider registries) {
         nbt.putDouble("Heat", this.capacitor.getHeat());
+        nbt.put("Config", this.config.serialize());
     }
 
     @Override
     public void deserialize(CompoundTag nbt, HolderLookup.Provider registries) {
         if(nbt.contains("Heat", Tag.TAG_DOUBLE))
             this.capacitor.setHeat(nbt.getDouble("Heat"));
+        if(nbt.contains("Config", Tag.TAG_COMPOUND))
+            this.config.deserialize(nbt.getCompound("Config"));
     }
 
     @Override
     public void getStuffToSync(Consumer<ISyncable<?, ?>> container) {
-        container.accept(DataType.createSyncable(SideConfig.class, this::getConfig, this.config::set));
+        container.accept(DataType.createSyncable(ToggleSideConfig.class, this::getConfig, this.config::set));
         container.accept(DataType.createSyncable(Double.class, this.capacitor::getHeat, this.capacitor::setHeat));
         container.accept(DataType.createSyncable(Double.class, this::getLastEnvironmentalLoss, loss -> this.lastEnvironmentalLoss = loss));
     }
@@ -159,7 +162,7 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
         return this.neighbours.get(side) == null ? null : this.neighbours.get(side).getCapability();
     }
 
-    public record Template(double capacity, double baseTemp, double inverseConductionCoefficient, double inverseInsulationCoefficient, SideConfig.Template config) implements IMachineComponentTemplate<HeatMachineComponent> {
+    public record Template(double capacity, double baseTemp, double inverseConductionCoefficient, double inverseInsulationCoefficient, ToggleSideConfig.Template config) implements IMachineComponentTemplate<HeatMachineComponent> {
 
         public static final NamedCodec<Template> CODEC = NamedCodec.record(templateInstance ->
                 templateInstance.group(
@@ -167,7 +170,7 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
                         NamedCodec.DOUBLE.optionalFieldOf("base_temp", 300.0D).forGetter(template -> template.baseTemp),
                         NamedCodec.DOUBLE.optionalFieldOf("conduction", 1.0D).forGetter(template -> template.inverseConductionCoefficient),
                         NamedCodec.DOUBLE.optionalFieldOf("insulation", 0.0D).forGetter(template -> template.inverseInsulationCoefficient),
-                        SideConfig.Template.CODEC.optionalFieldOf("config", ComponentIOMode.INPUT.getBaseConfig()).forGetter(template -> template.config)
+                        ToggleSideConfig.Template.CODEC.optionalFieldOf("config", ToggleSideConfig.Template.DEFAULT_ALL_ENABLED).forGetter(template -> template.config)
                 ).apply(templateInstance, Template::new), "Heat machine component"
         );
 

@@ -1,6 +1,6 @@
 package fr.frinn.custommachinerymekanism.common.transfer;
 
-import fr.frinn.custommachinery.impl.component.config.SideMode;
+import fr.frinn.custommachinery.impl.component.config.IOSideMode;
 import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent;
 import fr.frinn.custommachinerymekanism.common.component.handler.ChemicalComponentHandler;
 import mekanism.api.Action;
@@ -61,9 +61,9 @@ public class SidedChemicalTank implements IChemicalHandler {
         return component.extract(amount, action, false);
     }
 
-    private SideMode getMode(ChemicalMachineComponent component) {
+    private IOSideMode getMode(ChemicalMachineComponent component) {
         if(this.side == null)
-            return SideMode.BOTH;
+            return IOSideMode.BOTH;
         return component.getConfig().getSideMode(this.side);
     }
 }

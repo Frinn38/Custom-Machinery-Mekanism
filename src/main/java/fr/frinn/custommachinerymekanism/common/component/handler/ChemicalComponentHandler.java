@@ -10,7 +10,7 @@ import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.network.ISyncable;
 import fr.frinn.custommachinery.api.network.ISyncableStuff;
 import fr.frinn.custommachinery.impl.component.AbstractComponentHandler;
-import fr.frinn.custommachinery.impl.component.config.SideMode;
+import fr.frinn.custommachinery.impl.component.config.IOSideMode;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent;
 import fr.frinn.custommachinerymekanism.common.transfer.SidedChemicalTank;
@@ -90,13 +90,13 @@ public class ChemicalComponentHandler extends AbstractComponentHandler<ChemicalM
             componentNBT.putString("id", component.getId());
             componentsNBT.add(componentNBT);
         });
-        nbt.put("gases", componentsNBT);
+        nbt.put("chemicals", componentsNBT);
     }
 
     @Override
     public void deserialize(CompoundTag nbt, HolderLookup.Provider registries) {
-        if(nbt.contains("fluids", Tag.TAG_LIST)) {
-            ListTag componentsNBT = nbt.getList("gases", Tag.TAG_COMPOUND);
+        if(nbt.contains("chemicals", Tag.TAG_LIST)) {
+            ListTag componentsNBT = nbt.getList("chemicals", Tag.TAG_COMPOUND);
             componentsNBT.forEach(inbt -> {
                 if(inbt instanceof CompoundTag componentNBT) {
                     if(componentNBT.contains("id", Tag.TAG_STRING)) {
@@ -117,7 +117,7 @@ public class ChemicalComponentHandler extends AbstractComponentHandler<ChemicalM
     public void serverTick() {
         //I/O between the machine and neighbour blocks.
         for(Direction side : Direction.values()) {
-            if(this.getComponents().stream().allMatch(component -> component.getConfig().getSideMode(side) == SideMode.NONE))
+            if(this.getComponents().stream().allMatch(component -> component.getConfig().getSideMode(side) == IOSideMode.NONE))
                 continue;
 
             IChemicalHandler neighbour;

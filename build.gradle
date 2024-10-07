@@ -3,7 +3,7 @@ plugins {
     id 'eclipse'
     id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.gradle.userdev' version '7.0.145'
+    id 'net.neoforged.gradle.userdev' version '7.0.165'
     id"me.shedaniel.unified-publishing" version "0.1.+"
 }
 
@@ -56,7 +56,7 @@ runs {
 
     server {
         systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
-        programArgument '--nogui'
+        argument '--nogui'
     }
 
     // This run config launches GameTestServer and runs all registered gametests, then exits.
@@ -71,7 +71,7 @@ runs {
         // workingDirectory project.file('run-data')
 
         // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-        programArguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+        arguments.addAll '--mod', project.mod_id, '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
     }
 }
 
@@ -124,6 +124,13 @@ repositories {
         content {
             includeGroup "mcjty.theoneprobe"
             includeGroup "mekanism"
+        }
+    }
+    //Needed for KubeJS
+    maven {
+        url 'https://jitpack.io'
+        content {
+            includeGroup "com.github.rtyley"
         }
     }
 }

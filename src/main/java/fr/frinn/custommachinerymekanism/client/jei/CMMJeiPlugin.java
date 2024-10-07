@@ -25,6 +25,6 @@ public class CMMJeiPlugin implements IModPlugin {
 
     @Override
     public void registerIngredients(IModIngredientRegistration registration) {
-        registration.register(HEAT_INGREDIENT, Collections.emptyList(), new HeatIngredientHelper(), new DummyIngredientRenderer<>());
+        registration.register(HEAT_INGREDIENT, Collections.emptyList(), new HeatIngredientHelper(), new DummyIngredientRenderer<>(), Heat.CODEC);
     }
 }
