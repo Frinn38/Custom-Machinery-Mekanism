@@ -66,6 +66,16 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
         }
 
         @Override
+        public Component canCreate() {
+            if(this.id.getValue().isEmpty())
+                return Component.translatable("custommachinery.gui.creation.gui.id.missing");
+            else if(this.parent instanceof MachineEditScreen screen && screen.getBuilder().getComponents().stream().anyMatch(template -> template.getType() == Registration.CHEMICAL_MACHINE_COMPONENT.get() && this.baseTemplate().map(base -> base != template).orElse(true) && template.getId().equals(this.id.getValue())))
+                return Component.translatable("custommachinery.gui.creation.gui.id.duplicate", this.id.getValue());
+            else
+                return Component.empty();
+        }
+
+        @Override
         protected void init() {
             super.init();
 
