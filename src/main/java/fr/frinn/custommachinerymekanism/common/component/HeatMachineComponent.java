@@ -32,7 +32,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
 import org.jetbrains.annotations.Nullable;
 
@@ -94,25 +93,16 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
     }
 
     private void onConfigChange(RelativeSide side, ToggleSideMode old, ToggleSideMode now) {
-        if(old.isDisabled())
-            this.getManager().getLevel().updateNeighborsAt(this.getManager().getTile().getBlockPos(), this.getManager().getTile().getBlockState().getBlock());
+        if(old != now)
+            this.getManager().getTile().invalidateCapabilities();
     }
 
     private void updateNeighbours() {
         Level level = this.getManager().getLevel();
         BlockPos pos = this.getManager().getTile().getBlockPos();
         for(Direction side : Direction.values()) {
-            BlockCapabilityCache<IHeatHandler, Direction> cache = this.neighbours.get(side);
-            if(cache == null)
-                continue;
-            else if(cache.getCapability() == null)
-                this.neighbours.remove(side);
-            else if(cache.getCapability() != null)
-                continue;
-            BlockEntity be = level.getBlockEntity(pos.relative(side));
-            if(be == null)
-                continue;
-            this.neighbours.put(side, BlockCapabilityCache.create(Capabilities.HEAT, (ServerLevel) level, pos.relative(side), side.getOpposite(), () -> !this.getManager().getTile().isRemoved(), () -> this.neighbours.remove(side)));
+            if(this.neighbours.get(side) == null && level.getBlockEntity(pos.relative(side)) != null)
+                this.neighbours.put(side, BlockCapabilityCache.create(Capabilities.HEAT, (ServerLevel) level, pos.relative(side), side.getOpposite(), () -> !this.getManager().getTile().isRemoved(), () -> this.neighbours.remove(side)));
         }
     }
 
@@ -148,7 +138,10 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
 
     @Override
     public List<IHeatCapacitor> getHeatCapacitors(@Nullable Direction direction) {
-        return Collections.singletonList(this.capacitor);
+        if(direction == null || this.config.getSideMode(direction).isEnabled())
+            return Collections.singletonList(this.capacitor);
+        else
+            return Collections.emptyList();
     }
 
     @Override

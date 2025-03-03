@@ -11,6 +11,7 @@ import fr.frinn.custommachinery.api.network.ISyncable;
 import fr.frinn.custommachinery.api.network.ISyncableStuff;
 import fr.frinn.custommachinery.impl.component.AbstractComponentHandler;
 import fr.frinn.custommachinery.impl.component.config.IOSideMode;
+import fr.frinn.custommachinery.impl.component.config.RelativeSide;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent;
 import fr.frinn.custommachinerymekanism.common.transfer.SidedChemicalTank;
@@ -26,9 +27,9 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.neoforged.neoforge.capabilities.BlockCapabilityCache;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -43,23 +44,35 @@ public class ChemicalComponentHandler extends AbstractComponentHandler<ChemicalM
     private final IChemicalHandler generalHandler = new SidedChemicalTank(this, null);
     private final Map<Direction, IChemicalHandler> sidedHandlers = Maps.newEnumMap(Direction.class);
 
-    private final List<ChemicalMachineComponent> inputs;
-    private final List<ChemicalMachineComponent> outputs;
+    private final List<ChemicalMachineComponent> inputs = new ArrayList<>();
+    private final List<ChemicalMachineComponent> outputs = new ArrayList<>();
 
     public ChemicalComponentHandler(IMachineComponentManager manager, List<ChemicalMachineComponent> components) {
         super(manager, components);
         Arrays.stream(Direction.values()).forEach(side ->
                 this.sidedHandlers.put(side, new SidedChemicalTank(this, side))
         );
-        this.inputs = components.stream().filter(component -> component.getMode().isInput()).toList();
-        this.outputs = components.stream().filter(component -> component.getMode().isOutput()).toList();
+        components.forEach(component -> {
+            component.getConfig().setCallback(this::configChanged);
+            if(component.getMode().isInput())
+                this.inputs.add(component);
+            if(component.getMode().isOutput())
+                this.outputs.add(component);
+        });
     }
 
-    @NotNull
+    private void configChanged(RelativeSide side, IOSideMode oldMode, IOSideMode newMode) {
+        if(oldMode.isNone() != newMode.isNone())
+            this.getManager().getTile().invalidateCapabilities();
+    }
+
+    @Nullable
     public IChemicalHandler getSidedHandler(@Nullable Direction side) {
         if(side == null)
             return this.generalHandler;
-        return this.sidedHandlers.get(side);
+        else if(this.getComponents().stream().anyMatch(component -> !component.getConfig().getSideMode(side).isNone()))
+            return this.sidedHandlers.get(side);
+        return null;
     }
 
     public IChemicalHandler getGeneralHandler() {
