@@ -13,6 +13,7 @@ import mekanism.client.recipe_viewer.jei.MekanismJEI;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 
 import java.util.Optional;
@@ -40,7 +41,7 @@ public class ChemicalIngredientWrapper implements IJEIIngredientWrapper<Chemical
         if(!(element instanceof ChemicalGuiElement chemicalElement))
             return false;
 
-        ChemicalStack ingredient = new ChemicalStack(this.chemical, this.amount);
+        ChemicalStack ingredient = new ChemicalStack(Holder.direct(this.chemical), this.amount);
         Optional<IMachineComponentTemplate<?>> template = helper.getComponentForElement(chemicalElement);
         if(chemicalElement.getComponentId().equals(this.tank) || template.map(t -> t.canAccept(ingredient, this.mode == RequirementIOMode.INPUT, helper.getDummyManager()) && (this.tank.isEmpty() || t.getId().equals(this.tank))).orElse(false)) {
             builder.addSlot(roleFromMode(this.mode), element.getX() - xOffset + 1, element.getY() - yOffset + 1)

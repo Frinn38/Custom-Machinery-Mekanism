@@ -21,6 +21,7 @@ import mekanism.api.Action;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -103,8 +104,8 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
         if(!byPassLimit)
             maxInsert = Math.min(maxInsert, this.maxInput);
         if(action.execute())
-            setStack(new ChemicalStack(stack.getChemical(), maxInsert + (this.stack.isEmpty() ? 0 : this.stack.getAmount())));
-        return new ChemicalStack(stack.getChemical(), stack.getAmount() - maxInsert);
+            setStack(new ChemicalStack(stack.getChemicalHolder(), maxInsert + (this.stack.isEmpty() ? 0 : this.stack.getAmount())));
+        return new ChemicalStack(stack.getChemicalHolder(), stack.getAmount() - maxInsert);
     }
 
     //Return the extracted stack
@@ -115,7 +116,7 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
         long maxExtract = Math.min(this.stack.getAmount(), amount);
         if(!byPassLimit)
             maxExtract = Math.min(maxExtract, this.maxOutput);
-        Chemical type = this.stack.getChemical();
+        Holder<Chemical> type = this.stack.getChemicalHolder();
         if(action.execute()) {
             this.stack.shrink(maxExtract);
             getManager().markDirty();

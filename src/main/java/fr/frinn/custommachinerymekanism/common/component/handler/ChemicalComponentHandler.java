@@ -21,6 +21,7 @@ import mekanism.api.chemical.ChemicalStack;
 import mekanism.api.chemical.IChemicalHandler;
 import mekanism.common.capabilities.Capabilities;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -196,7 +197,7 @@ public class ChemicalComponentHandler extends AbstractComponentHandler<ChemicalM
 
     public long getSpaceForChemical(String tank, Chemical chemical) {
         Predicate<ChemicalMachineComponent> tankPredicate = component -> tank.isEmpty() || component.getId().equals(tank);
-        return this.outputs.stream().filter(component -> component.isValid(new ChemicalStack(chemical, 1)) && tankPredicate.test(component)).mapToLong(component -> component.getCapacity() - component.insert(new ChemicalStack(chemical, component.getCapacity()), Action.SIMULATE, true).getAmount()).sum();
+        return this.outputs.stream().filter(component -> component.isValid(new ChemicalStack(Holder.direct(chemical), 1)) && tankPredicate.test(component)).mapToLong(component -> component.getCapacity() - component.insert(new ChemicalStack(Holder.direct(chemical), component.getCapacity()), Action.SIMULATE, true).getAmount()).sum();
     }
 
     public void removeFromInputs(String tank, Chemical chemical, long amount) {
@@ -213,10 +214,10 @@ public class ChemicalComponentHandler extends AbstractComponentHandler<ChemicalM
         AtomicLong toAdd = new AtomicLong(amount);
         Predicate<ChemicalMachineComponent> tankPredicate = component -> tank.isEmpty() || component.getId().equals(tank);
         this.outputs.stream()
-                .filter(component -> component.isValid(new ChemicalStack(chemical, 1)) && tankPredicate.test(component))
+                .filter(component -> component.isValid(new ChemicalStack(Holder.direct(chemical), 1)) && tankPredicate.test(component))
                 .sorted(Comparator.comparingInt(component -> component.getStack().getChemical() == chemical ? -1 : 1))
                 .forEach(component -> {
-                    long maxInsert = toAdd.get() - component.insert(new ChemicalStack(chemical, toAdd.get()), Action.EXECUTE, true).getAmount();
+                    long maxInsert = toAdd.get() - component.insert(new ChemicalStack(Holder.direct(chemical), toAdd.get()), Action.EXECUTE, true).getAmount();
                     toAdd.addAndGet(-maxInsert);
                 });
     }

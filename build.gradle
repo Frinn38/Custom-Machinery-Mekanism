@@ -89,7 +89,7 @@ configurations {
 repositories {
     maven {
         name = "Frinn's maven"
-        url = 'https://maven.frinn.fr/repository/maven/'
+        url = 'https://maven.frinn.fr/releases'
         content {
             includeGroup "frinn.custommachinery"
         }
@@ -223,9 +223,9 @@ publishing {
     repositories {
         maven {
             name = 'maven'
-            url = 'https://maven.frinn.fr/repository/maven/'
+            url = 'https://maven.frinn.fr/releases/'
             credentials {
-                username = 'frinn'
+                username = 'Frinn'
                 password = System.getenv('MAVEN_PASSWORD')
             }
         }

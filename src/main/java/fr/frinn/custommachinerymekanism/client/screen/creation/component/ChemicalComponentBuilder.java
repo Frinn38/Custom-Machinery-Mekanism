@@ -40,7 +40,7 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
 
     @Override
     public void render(GuiGraphics graphics, int x, int y, int width, int height, Template template) {
-        graphics.renderFakeItem(MekanismBlocks.ULTIMATE_CHEMICAL_TANK.getItemStack(), x, y + height / 2 - 8);
+        graphics.renderFakeItem(MekanismBlocks.ULTIMATE_CHEMICAL_TANK.asItem().getDefaultInstance(), x, y + height / 2 - 8);
         graphics.drawString(Minecraft.getInstance().font, "type: " + template.getType().getId().getPath(), x + 25, y + 5, 0, false);
         graphics.drawString(Minecraft.getInstance().font, "id: \"" + template.getId() + "\"", x + 25, y + 15, FastColor.ARGB32.color(255, 128, 0, 0), false);
         graphics.drawString(Minecraft.getInstance().font, "mode: " + template.mode(), x + 25, y + 25, FastColor.ARGB32.color(255, 0, 0, 128), false);

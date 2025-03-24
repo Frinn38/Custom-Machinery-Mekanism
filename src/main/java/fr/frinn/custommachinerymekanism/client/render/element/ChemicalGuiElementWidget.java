@@ -15,10 +15,11 @@ import mekanism.client.gui.GuiUtils;
 import mekanism.client.gui.GuiUtils.TilingDirection;
 import mekanism.client.render.MekanismRenderer;
 import mekanism.common.MekanismLang;
-import mekanism.common.util.ChemicalUtil;
 import mekanism.common.util.text.TextUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item.TooltipContext;
+import net.minecraft.world.item.TooltipFlag;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -47,7 +48,7 @@ public class ChemicalGuiElementWidget extends TexturedGuiElementWidget<ChemicalG
                 }
 
                 Chemical chemical = stack.getChemical();
-                MekanismRenderer.color(graphics, chemical);
+                MekanismRenderer.color(graphics, stack);
                 GuiUtils.drawTiledSprite(graphics, this.getX() + 1, this.getY() + 1, this.height - 2, this.width - 2, desiredHeight, MekanismRenderer.getSprite(chemical.getIcon()), 16, 16, 100, TilingDirection.UP_RIGHT, false);
                 MekanismRenderer.resetColor(graphics);
                 RenderSystem.disableBlend();
@@ -67,7 +68,7 @@ public class ChemicalGuiElementWidget extends TexturedGuiElementWidget<ChemicalG
                     List<Component> tooltips = new ArrayList<>();
                     tooltips.add(TextComponentUtil.build(stack));
                     tooltips.add(MekanismLang.GENERIC_MB.translateColored(EnumColor.GRAY, TextUtils.format(stack.getAmount())));
-                    ChemicalUtil.addChemicalDataToTooltip(tooltips, stack.getChemical(), false);
+                    stack.appendHoverText(TooltipContext.EMPTY, tooltips, TooltipFlag.NORMAL);
                     return tooltips;
                 })
                 .orElse(Collections.emptyList());
