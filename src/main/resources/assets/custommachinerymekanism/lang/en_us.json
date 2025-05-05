@@ -19,6 +19,8 @@
   "custommachinerymekanism.gui.creation.components.heat.insulation": "Insulation",
   "custommachinerymekanism.gui.creation.components.heat.insulation.tooltip": "A coefficient that determines how much heat will be dissipated into the environment (lost)\nHigher values mean less heat loss",
   "custommachinerymekanism.gui.creation.components.chemical.title": "Chemical component",
+  "custommachinerymekanism.gui.creation.components.chemical.radiations": "Radiations",
+  "custommachinerymekanism.gui.creation.components.chemical.radiations.tooltip": "Emit radiations when the machine is broken and contains radioactive chemical",
 
   "custommachinerymekanism.jei.ingredient.heat": "Heat:  %s",
   "custommachinerymekanism.jei.ingredient.heat.input": "Consume %sHeat",

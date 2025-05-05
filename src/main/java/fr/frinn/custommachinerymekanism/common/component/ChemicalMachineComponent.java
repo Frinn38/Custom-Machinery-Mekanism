@@ -39,10 +39,11 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
     private final long maxOutput;
     private final IOSideConfig config;
     private final boolean unique;
+    private final boolean radiations;
 
     private ChemicalStack stack = ChemicalStack.EMPTY;
 
-    public ChemicalMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, IOSideConfig.Template config, boolean unique) {
+    public ChemicalMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, IOSideConfig.Template config, boolean unique, boolean radiations) {
         super(manager, mode);
         this.id = id;
         this.capacity = capacity;
@@ -51,6 +52,7 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
         this.maxOutput = maxOutput;
         this.config = config.build(this);
         this.unique = unique;
+        this.radiations = radiations;
     }
 
     @Override
@@ -73,6 +75,10 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
     public void setStack(ChemicalStack stack) {
         this.stack = stack;
         getManager().markDirty();
+    }
+
+    public boolean emitRadiationsWhenBroken() {
+        return this.radiations;
     }
 
     public boolean isValid(ChemicalStack stack) {
@@ -155,7 +161,7 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
         container.accept(DataType.createSyncable(IOSideConfig.class, this::getConfig, this.config::set));
     }
 
-    public record Template(String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, IOSideConfig.Template config, boolean unique) implements IMachineComponentTemplate<ChemicalMachineComponent> {
+    public record Template(String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, IOSideConfig.Template config, boolean unique, boolean radiations) implements IMachineComponentTemplate<ChemicalMachineComponent> {
 
         public static NamedCodec<Template> CODEC = NamedCodec.record(templateInstance ->
                 templateInstance.group(
@@ -166,9 +172,10 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
                         NamedCodec.LONG.optionalFieldOf("max_input").forGetter(template -> template.maxInput == template.capacity ? Optional.empty() : Optional.of(template.maxInput)),
                         NamedCodec.LONG.optionalFieldOf("max_output").forGetter(template -> template.maxOutput == template.capacity ? Optional.empty() : Optional.of(template.maxOutput)),
                         IOSideConfig.Template.CODEC.optionalFieldOf("config").forGetter(template -> template.config == template.mode.getBaseConfig() ? Optional.empty() : Optional.of(template.config)),
-                        NamedCodec.BOOL.optionalFieldOf("unique", false).forGetter(template -> template.unique)
-                ).apply(templateInstance, (id, capacity, mode, filter, maxInput, maxOutput, config, unique) ->
-                        new Template(id, capacity, mode, filter, maxInput.orElse(capacity), maxOutput.orElse(capacity), config.orElse(mode.getBaseConfig()), unique)
+                        NamedCodec.BOOL.optionalFieldOf("unique", false).forGetter(template -> template.unique),
+                        NamedCodec.BOOL.optionalFieldOf("radiations", false).forGetter(template -> template.radiations)
+                ).apply(templateInstance, (id, capacity, mode, filter, maxInput, maxOutput, config, unique, radiations) ->
+                        new Template(id, capacity, mode, filter, maxInput.orElse(capacity), maxOutput.orElse(capacity), config.orElse(mode.getBaseConfig()), unique, radiations)
                 ), "Chemical machine component"
         );
 
@@ -200,7 +207,7 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
 
         @Override
         public ChemicalMachineComponent build(IMachineComponentManager manager) {
-            return new ChemicalMachineComponent(manager, this.id, this.capacity, this.mode, this.filter, this.maxInput, this.maxOutput, this.config, this.unique);
+            return new ChemicalMachineComponent(manager, this.id, this.capacity, this.mode, this.filter, this.maxInput, this.maxOutput, this.config, this.unique, this.radiations);
         }
     }
 }

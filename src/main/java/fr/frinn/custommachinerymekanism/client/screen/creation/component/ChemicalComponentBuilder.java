@@ -53,8 +53,9 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
         private EditBox capacity;
         private EditBox maxInput;
         private EditBox maxOutput;
-        private Checkbox unique;
         private IOSideConfig.Template config;
+        private Checkbox unique;
+        private Checkbox radiations;
 
         public ChemicalComponentBuilderPopup(BaseScreen parent, @Nullable Template template, Consumer<Template> onFinish, Component title) {
             super(parent, template, onFinish, title);
@@ -62,7 +63,7 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
 
         @Override
         public Template makeTemplate() {
-            return new Template(this.id.getValue(), this.parseLong(this.capacity.getValue()), this.mode.getValue(), this.baseTemplate().map(Template::filter).orElse(Filter.empty()), this.parseLong(this.maxInput.getValue()), this.parseLong(this.maxOutput.getValue()), this.config, this.unique.selected());
+            return new Template(this.id.getValue(), this.parseLong(this.capacity.getValue()), this.mode.getValue(), this.baseTemplate().map(Template::filter).orElse(Filter.empty()), this.parseLong(this.maxInput.getValue()), this.parseLong(this.maxOutput.getValue()), this.config, this.unique.selected(), this.radiations.selected());
         }
 
         @Override
@@ -103,14 +104,20 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
             this.maxOutput.setFilter(this::checkLong);
             this.baseTemplate().ifPresentOrElse(template -> this.maxOutput.setValue("" + template.maxOutput()), () -> this.maxOutput.setValue("10000"));
 
-            //Unique
-            this.unique = this.propertyList.add(Component.translatable("custommachinery.gui.creation.components.fluid.unique"), Checkbox.builder(Component.translatable("custommachinery.gui.creation.components.fluid.unique"), this.font).selected(false).build());
-            if(this.baseTemplate().map(Template::unique).orElse(false) != this.unique.selected())
-                this.unique.onPress();
-
             //Config
             this.baseTemplate().ifPresentOrElse(template -> this.config = template.config(), () -> this.config = IOSideConfig.Template.DEFAULT_ALL_INPUT);
             this.propertyList.add(Component.translatable("custommachinery.gui.config.component"), ComponentConfigBuilderWidget.make(0, 0, 180, 20, Component.translatable("custommachinery.gui.config.component"), this.parent, () -> this.config, template -> this.config = template));
+
+            //Unique
+            this.unique = this.propertyList.add(Component.translatable("custommachinery.gui.creation.components.fluid.unique"), Checkbox.builder(Component.empty(), this.font).selected(false).build());
+            if(this.baseTemplate().map(Template::unique).orElse(false) != this.unique.selected())
+                this.unique.onPress();
+
+            //Radiations
+            this.radiations = this.propertyList.add(Component.translatable("custommachinerymekanism.gui.creation.components.chemical.radiations"), Checkbox.builder(Component.empty(), this.font).selected(false).build());
+            this.radiations.setTooltip(Tooltip.create(Component.translatable("custommachinerymekanism.gui.creation.components.chemical.radiations.tooltip")));
+            if(this.baseTemplate().map(Template::radiations).orElse(false) != this.radiations.selected())
+                this.radiations.onPress();
         }
     }
 }

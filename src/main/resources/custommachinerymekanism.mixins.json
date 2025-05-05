@@ -3,12 +3,12 @@
   "package": "fr.frinn.custommachinerymekanism.common.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "CustomMachineBlockMixin",
     "KubeJSIntegrationMixin",
     "MachineCTMixin",
     "MachineJSMixin"
   ],
   "client": [
-
   ],
   "injectors": {
     "defaultRequire": 1
