@@ -108,7 +108,7 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
 
     @Nullable
     public IHeatHandler getHeatHandler(@Nullable Direction side) {
-        if(!this.config.getSideMode(side).isDisabled())
+        if(!this.config.getDirectionMode(side).isDisabled())
             return this;
         return null;
     }
@@ -138,7 +138,7 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
 
     @Override
     public List<IHeatCapacitor> getHeatCapacitors(@Nullable Direction direction) {
-        if(direction == null || this.config.getSideMode(direction).isEnabled())
+        if(direction == null || this.config.getDirectionMode(direction).isEnabled())
             return Collections.singletonList(this.capacitor);
         else
             return Collections.emptyList();

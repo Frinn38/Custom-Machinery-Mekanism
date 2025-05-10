@@ -64,6 +64,6 @@ public class SidedChemicalTank implements IChemicalHandler {
     private IOSideMode getMode(ChemicalMachineComponent component) {
         if(this.side == null)
             return IOSideMode.BOTH;
-        return component.getConfig().getSideMode(this.side);
+        return component.getConfig().getDirectionMode(this.side);
     }
 }

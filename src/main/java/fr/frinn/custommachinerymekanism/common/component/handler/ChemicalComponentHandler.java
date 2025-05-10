@@ -71,7 +71,7 @@ public class ChemicalComponentHandler extends AbstractComponentHandler<ChemicalM
     public IChemicalHandler getSidedHandler(@Nullable Direction side) {
         if(side == null)
             return this.generalHandler;
-        else if(this.getComponents().stream().anyMatch(component -> !component.getConfig().getSideMode(side).isNone()))
+        else if(this.getComponents().stream().anyMatch(component -> !component.getConfig().getDirectionMode(side).isNone()))
             return this.sidedHandlers.get(side);
         return null;
     }
@@ -131,7 +131,7 @@ public class ChemicalComponentHandler extends AbstractComponentHandler<ChemicalM
     public void serverTick() {
         //I/O between the machine and neighbour blocks.
         for(Direction side : Direction.values()) {
-            if(this.getComponents().stream().allMatch(component -> component.getConfig().getSideMode(side) == IOSideMode.NONE))
+            if(this.getComponents().stream().allMatch(component -> component.getConfig().getDirectionMode(side) == IOSideMode.NONE))
                 continue;
 
             IChemicalHandler neighbour;
@@ -150,7 +150,7 @@ public class ChemicalComponentHandler extends AbstractComponentHandler<ChemicalM
                 continue;
 
             for(ChemicalMachineComponent component : this.getComponents()) {
-                if(component.getConfig().isAutoInput() && component.getConfig().getSideMode(side).isInput() && component.getStack().getAmount() < component.getCapacity()) {
+                if(component.getConfig().isAutoInput() && component.getConfig().getDirectionMode(side).isInput() && component.getStack().getAmount() < component.getCapacity()) {
                     ChemicalStack maxExtract = neighbour.extractChemical(Long.MAX_VALUE, Action.SIMULATE);
 
                     if(maxExtract.isEmpty())
@@ -164,7 +164,7 @@ public class ChemicalComponentHandler extends AbstractComponentHandler<ChemicalM
                     component.insert(neighbour.extractChemical(Long.MAX_VALUE, Action.EXECUTE), Action.EXECUTE, false);
                 }
 
-                if(component.getConfig().isAutoOutput() && component.getConfig().getSideMode(side).isOutput() && component.getStack().getAmount() > 0) {
+                if(component.getConfig().isAutoOutput() && component.getConfig().getDirectionMode(side).isOutput() && component.getStack().getAmount() > 0) {
                     ChemicalStack maxExtract = component.extract(Long.MAX_VALUE, Action.SIMULATE, false);
 
                     if(maxExtract.isEmpty())
