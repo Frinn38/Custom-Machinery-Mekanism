@@ -8,13 +8,13 @@ import fr.frinn.custommachinery.client.screen.creation.gui.IGuiElementBuilder;
 import fr.frinn.custommachinery.client.screen.creation.gui.MutableProperties;
 import fr.frinn.custommachinery.client.screen.popup.PopupScreen;
 import fr.frinn.custommachinery.impl.guielement.AbstractGuiElement.Properties;
+import fr.frinn.custommachinery.impl.util.TextureInfo;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.guielement.HeatGuiElement;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.GridLayout.RowHelper;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
@@ -41,8 +41,8 @@ public class HeatGuiElementBuilder implements IGuiElementBuilder<HeatGuiElement>
 
     public static class HeatGuiElementBuilderPopup extends GuiElementBuilderPopup<HeatGuiElement> {
 
-        private ResourceLocation textureEmpty = HeatGuiElement.BASE_TEXTURE;
-        private ResourceLocation textureFilled = HeatGuiElement.BASE_TEXTURE_FILLED;
+        private TextureInfo textureEmpty = HeatGuiElement.BASE_TEXTURE;
+        private TextureInfo textureFilled = HeatGuiElement.BASE_TEXTURE_FILLED;
         private Checkbox highlight;
 
         public HeatGuiElementBuilderPopup(BaseScreen parent, MutableProperties properties, @Nullable HeatGuiElement from, Consumer<HeatGuiElement> onFinish) {

@@ -6,13 +6,13 @@ import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.guielement.GuiElementType;
 import fr.frinn.custommachinery.api.guielement.IComponentGuiElement;
 import fr.frinn.custommachinery.impl.guielement.AbstractTexturedGuiElement;
+import fr.frinn.custommachinery.impl.util.TextureInfo;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent;
-import net.minecraft.resources.ResourceLocation;
 
 public class ChemicalGuiElement extends AbstractTexturedGuiElement implements IComponentGuiElement<ChemicalMachineComponent> {
 
-    public static final ResourceLocation BASE_TEXTURE = ICustomMachineryAPI.INSTANCE.rl("textures/gui/base_fluid_storage.png");
+    public static final TextureInfo BASE_TEXTURE = new TextureInfo(ICustomMachineryAPI.INSTANCE.rl("textures/gui/base_fluid_storage.png"));
 
     public static NamedCodec<ChemicalGuiElement> CODEC = NamedCodec.record(chemicalGuiElementInstance ->
             chemicalGuiElementInstance.group(

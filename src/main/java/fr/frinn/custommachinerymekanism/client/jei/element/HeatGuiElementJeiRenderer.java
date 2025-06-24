@@ -14,6 +14,6 @@ public class HeatGuiElementJeiRenderer implements IJEIElementRenderer<HeatGuiEle
         int width = element.getWidth();
         int height = element.getHeight();
 
-        graphics.blit(element.getTexture(), posX, posY, 0, 0, width, height, width, height);
+        graphics.blit(element.getTexture().texture(), posX, posY, element.getTexture().u(), element.getTexture().v(), width, height, width, height);
     }
 }

@@ -39,7 +39,7 @@ public class HeatJEIIngredientRenderer extends JEIIngredientRenderer<Heat, HeatG
 
         graphics.pose().pushPose();
         graphics.pose().translate(0, 0, 10);
-        graphics.blit(this.element.getFilledTexture(), -1, -1, 0, 0, width, height, width, height);
+        graphics.blit(this.element.getFilledTexture().texture(), -1, -1, this.element.getFilledTexture().u(), this.element.getFilledTexture().v(), width, height, width, height);
         graphics.pose().popPose();
     }
 
