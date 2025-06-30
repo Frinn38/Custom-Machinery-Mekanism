@@ -12,7 +12,6 @@ import fr.frinn.custommachinery.api.requirement.RequirementIOMode;
 import fr.frinn.custommachinery.api.requirement.RequirementType;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.RadiationMachineComponent;
-import mekanism.common.config.MekanismConfig;
 import mekanism.common.lib.radiation.RadiationManager.RadiationScale;
 import mekanism.common.registries.MekanismItems;
 import mekanism.common.util.UnitDisplayUtils;
@@ -25,7 +24,7 @@ public class RadiationRequirement implements IRequirement<RadiationMachineCompon
             radiationRequirementInstance.group(
                     RequirementIOMode.CODEC.fieldOf("mode").forGetter(RadiationRequirement::getMode),
                     NamedCodec.doubleRange(0.0D, Double.MAX_VALUE).fieldOf("amount").forGetter(requirement -> requirement.amount),
-                    NamedCodec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("range", () -> MekanismConfig.general.radiationChunkCheckRadius.get() * 16).forGetter(requirement -> requirement.radius)
+                    NamedCodec.intRange(0, Integer.MAX_VALUE).optionalFieldOf("range", () -> 80/*5 chunks (default Mek config value)*/).forGetter(requirement -> requirement.radius)
             ).apply(radiationRequirementInstance, RadiationRequirement::new), "Radiation requirement"
     );
 
