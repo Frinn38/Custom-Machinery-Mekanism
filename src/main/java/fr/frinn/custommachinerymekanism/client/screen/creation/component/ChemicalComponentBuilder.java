@@ -1,5 +1,6 @@
 package fr.frinn.custommachinerymekanism.client.screen.creation.component;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import fr.frinn.custommachinery.api.component.ComponentIOMode;
 import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.utils.Filter;
@@ -7,24 +8,37 @@ import fr.frinn.custommachinery.client.screen.BaseScreen;
 import fr.frinn.custommachinery.client.screen.creation.MachineEditScreen;
 import fr.frinn.custommachinery.client.screen.creation.component.ComponentBuilderPopup;
 import fr.frinn.custommachinery.client.screen.creation.component.ComponentConfigBuilderWidget;
+import fr.frinn.custommachinery.client.screen.creation.component.FilterConfigPopup;
+import fr.frinn.custommachinery.client.screen.creation.component.FilterConfigPopup.FilterBuilderHelper;
 import fr.frinn.custommachinery.client.screen.creation.component.IMachineComponentBuilder;
 import fr.frinn.custommachinery.client.screen.popup.PopupScreen;
 import fr.frinn.custommachinery.impl.component.config.IOSideConfig;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent;
 import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent.Template;
+import mekanism.api.MekanismAPI;
+import mekanism.api.chemical.Chemical;
+import mekanism.api.chemical.ChemicalStack;
+import mekanism.client.gui.GuiUtils;
+import mekanism.client.gui.GuiUtils.TilingDirection;
+import mekanism.client.render.MekanismRenderer;
 import mekanism.common.registries.MekanismBlocks;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class ChemicalComponentBuilder implements IMachineComponentBuilder<ChemicalMachineComponent, Template> {
 
@@ -53,6 +67,7 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
         private EditBox capacity;
         private EditBox maxInput;
         private EditBox maxOutput;
+        private Filter<Chemical> filter;
         private IOSideConfig.Template config;
         private Checkbox unique;
         private Checkbox radiations;
@@ -63,7 +78,7 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
 
         @Override
         public Template makeTemplate() {
-            return new Template(this.id.getValue(), this.parseLong(this.capacity.getValue()), this.mode.getValue(), this.baseTemplate().map(Template::filter).orElse(Filter.empty()), this.parseLong(this.maxInput.getValue()), this.parseLong(this.maxOutput.getValue()), this.config, this.unique.selected(), this.radiations.selected());
+            return new Template(this.id.getValue(), this.parseLong(this.capacity.getValue()), this.mode.getValue(), this.filter, this.parseLong(this.maxInput.getValue()), this.parseLong(this.maxOutput.getValue()), this.config, this.unique.selected(), this.radiations.selected());
         }
 
         @Override
@@ -104,6 +119,10 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
             this.maxOutput.setFilter(this::checkLong);
             this.baseTemplate().ifPresentOrElse(template -> this.maxOutput.setValue("" + template.maxOutput()), () -> this.maxOutput.setValue("10000"));
 
+            //Filter
+            this.baseTemplate().ifPresentOrElse(template -> this.filter = template.filter(), () -> this.filter = Filter.empty());
+            this.propertyList.add(Component.translatable("custommachinery.gui.creation.components.filter"), Button.builder(Component.translatable("custommachinery.gui.creation.components.filter"), button -> this.parent.openPopup(new FilterConfigPopup<>(this.parent, () -> this.filter, filter -> this.filter = filter, new ChemicalFilterHelper()), "Chemical Filter")).size(180, 20).build());
+
             //Config
             this.baseTemplate().ifPresentOrElse(template -> this.config = template.config(), () -> this.config = IOSideConfig.Template.DEFAULT_ALL_INPUT);
             this.propertyList.add(Component.translatable("custommachinery.gui.config.component"), ComponentConfigBuilderWidget.make(0, 0, 180, 20, Component.translatable("custommachinery.gui.config.component"), this.parent, () -> this.config, template -> this.config = template));
@@ -118,6 +137,38 @@ public class ChemicalComponentBuilder implements IMachineComponentBuilder<Chemic
             this.radiations.setTooltip(Tooltip.create(Component.translatable("custommachinerymekanism.gui.creation.components.chemical.radiations.tooltip")));
             if(this.baseTemplate().map(Template::radiations).orElse(false) != this.radiations.selected())
                 this.radiations.onPress();
+        }
+    }
+
+    private static class ChemicalFilterHelper implements FilterBuilderHelper<Chemical> {
+
+        @Override
+        public void renderSingle(Chemical single, GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+            RenderSystem.enableBlend();
+            MekanismRenderer.color(graphics, new ChemicalStack(Holder.direct(single), 1));
+            GuiUtils.drawTiledSprite(graphics, 0, 0, 16, 16, 16, MekanismRenderer.getSprite(single.getIcon()), 16, 16, 0, TilingDirection.UP_RIGHT, false);
+            MekanismRenderer.resetColor(graphics);
+            RenderSystem.disableBlend();
+        }
+
+        @Override
+        public Component tooltip(Chemical single) {
+            return single.getTextComponent();
+        }
+
+        @Override
+        public Registry<Chemical> registry() {
+            return MekanismAPI.CHEMICAL_REGISTRY;
+        }
+
+        @Override
+        public Stream<ResourceLocation> getAll() {
+            return registry().entrySet().stream().map(entry -> entry.getKey().location());
+        }
+
+        @Override
+        public Chemical defaultValue() {
+            return ChemicalStack.EMPTY.getChemical();
         }
     }
 }
