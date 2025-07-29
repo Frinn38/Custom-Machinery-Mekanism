@@ -5,6 +5,7 @@ import fr.frinn.custommachinery.api.codec.NamedCodec;
 import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.guielement.GuiElementType;
 import fr.frinn.custommachinery.api.guielement.IComponentGuiElement;
+import fr.frinn.custommachinery.common.guielement.ProgressBarGuiElement.Orientation;
 import fr.frinn.custommachinery.impl.guielement.AbstractTexturedGuiElement;
 import fr.frinn.custommachinery.impl.util.TextureInfo;
 import fr.frinn.custommachinerymekanism.Registration;
@@ -17,14 +18,17 @@ public class ChemicalGuiElement extends AbstractTexturedGuiElement implements IC
     public static NamedCodec<ChemicalGuiElement> CODEC = NamedCodec.record(chemicalGuiElementInstance ->
             chemicalGuiElementInstance.group(
                     makePropertiesCodec(BASE_TEXTURE).forGetter(ChemicalGuiElement::getProperties),
+                    NamedCodec.enumCodec(Orientation.class).optionalFieldOf("orientation", Orientation.TOP).aliases("direction").forGetter(ChemicalGuiElement::getOrientation),
                     NamedCodec.BOOL.optionalFieldOf("highlight", true).forGetter(ChemicalGuiElement::highlight)
             ).apply(chemicalGuiElementInstance, ChemicalGuiElement::new), "Chemical gui element"
     );
 
+    private final Orientation orientation;
     private final boolean highlight;
 
-    public ChemicalGuiElement(Properties properties, boolean highlight) {
+    public ChemicalGuiElement(Properties properties, Orientation orientation, boolean highlight) {
         super(properties);
+        this.orientation = orientation;
         this.highlight = highlight;
     }
 
@@ -41,6 +45,10 @@ public class ChemicalGuiElement extends AbstractTexturedGuiElement implements IC
     @Override
     public String getComponentId() {
         return this.getId();
+    }
+
+    public Orientation getOrientation() {
+        return this.orientation;
     }
 
     public boolean highlight() {

@@ -39,17 +39,18 @@ public class ChemicalGuiElementWidget extends TexturedGuiElementWidget<ChemicalG
             if(!stack.isEmpty()) {
                 RenderSystem.enableBlend();
                 int desiredHeight = MathUtils.clampToInt((double)(this.height - 2) * (double)stack.getAmount() / (double)component.getCapacity());
-                if (desiredHeight < 1) {
-                    desiredHeight = 1;
-                }
-
-                if (desiredHeight > this.height) {
-                    desiredHeight = this.height;
-                }
+                desiredHeight = Math.clamp(desiredHeight, 1, this.height);
+                int desiredWidth = MathUtils.clampToInt((double)(this.width - 2) * (double)stack.getAmount() / (double)component.getCapacity());
+                desiredWidth = Math.clamp(desiredWidth, 1, this.width);
 
                 Chemical chemical = stack.getChemical();
                 MekanismRenderer.color(graphics, stack);
-                GuiUtils.drawTiledSprite(graphics, this.getX() + 1, this.getY() + 1, this.height - 2, this.width - 2, desiredHeight, MekanismRenderer.getSprite(chemical.getIcon()), 16, 16, 100, TilingDirection.UP_RIGHT, false);
+                switch(this.getElement().getOrientation()) {
+                    case TOP -> GuiUtils.drawTiledSprite(graphics, this.getX() + 1, this.getY() + 1, this.height - 2, this.width - 2, desiredHeight, MekanismRenderer.getSprite(chemical.getIcon()), 16, 16, 100, TilingDirection.UP_RIGHT, false);
+                    case BOTTOM -> GuiUtils.drawTiledSprite(graphics, this.getX() + 1, this.getY() + 1, desiredHeight, this.width - 2, desiredHeight, MekanismRenderer.getSprite(chemical.getIcon()), 16, 16, 100, TilingDirection.DOWN_RIGHT, false);
+                    case LEFT -> GuiUtils.drawTiledSprite(graphics, this.getX() + 1 + this.width - 2 - desiredWidth, this.getY() + 1, this.height - 2, desiredWidth, this.height - 2, MekanismRenderer.getSprite(chemical.getIcon()), 16, 16, 100, TilingDirection.UP_LEFT, false);
+                    case RIGHT -> GuiUtils.drawTiledSprite(graphics, this.getX() + 1, this.getY() + 1, this.height - 2, desiredWidth, this.height - 2, MekanismRenderer.getSprite(chemical.getIcon()), 16, 16, 100, TilingDirection.UP_RIGHT, false);
+                }
                 MekanismRenderer.resetColor(graphics);
                 RenderSystem.disableBlend();
             }

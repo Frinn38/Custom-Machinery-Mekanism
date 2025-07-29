@@ -4,12 +4,11 @@ import fr.frinn.custommachinery.api.integration.kubejs.RecipeJSBuilder;
 import fr.frinn.custommachinery.api.requirement.RequirementIOMode;
 import fr.frinn.custommachinerymekanism.common.requirement.RadiationPerTickRequirement;
 import fr.frinn.custommachinerymekanism.common.requirement.RadiationRequirement;
-import mekanism.common.config.MekanismConfig;
 
 public interface RadiationRequirementJS extends RecipeJSBuilder {
 
     default RecipeJSBuilder requireRadiation(double amount) {
-        return requireRadiation(amount, MekanismConfig.general.radiationChunkCheckRadius.get() * 16);
+        return requireRadiation(amount, 80);
     }
 
     default RecipeJSBuilder requireRadiation(double amount, int radius) {
@@ -17,7 +16,7 @@ public interface RadiationRequirementJS extends RecipeJSBuilder {
     }
 
     default RecipeJSBuilder requireRadiationPerTick(double amount) {
-        return requireRadiationPerTick(amount, MekanismConfig.general.radiationChunkCheckRadius.get() * 16);
+        return requireRadiationPerTick(amount, 80);
     }
 
     default RecipeJSBuilder requireRadiationPerTick(double amount, int radius) {

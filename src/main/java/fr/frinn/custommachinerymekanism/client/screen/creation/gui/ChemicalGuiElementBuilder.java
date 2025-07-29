@@ -7,10 +7,12 @@ import fr.frinn.custommachinery.client.screen.creation.gui.GuiElementBuilderPopu
 import fr.frinn.custommachinery.client.screen.creation.gui.IGuiElementBuilder;
 import fr.frinn.custommachinery.client.screen.creation.gui.MutableProperties;
 import fr.frinn.custommachinery.client.screen.popup.PopupScreen;
+import fr.frinn.custommachinery.common.guielement.ProgressBarGuiElement.Orientation;
 import fr.frinn.custommachinery.impl.guielement.AbstractGuiElement.Properties;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.guielement.ChemicalGuiElement;
 import net.minecraft.client.gui.components.Checkbox;
+import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.GridLayout.RowHelper;
 import net.minecraft.network.chat.Component;
@@ -28,9 +30,9 @@ public class ChemicalGuiElementBuilder implements IGuiElementBuilder<ChemicalGui
     @Override
     public ChemicalGuiElement make(Properties properties, @Nullable ChemicalGuiElement from) {
         if(from != null)
-            return new ChemicalGuiElement(properties, from.highlight());
+            return new ChemicalGuiElement(properties, from.getOrientation(), from.highlight());
         else
-            return new ChemicalGuiElement(properties, true);
+            return new ChemicalGuiElement(properties, Orientation.TOP, true);
     }
 
     @Override
@@ -40,6 +42,7 @@ public class ChemicalGuiElementBuilder implements IGuiElementBuilder<ChemicalGui
 
     public static class ChemicalGuiElementBuilderPopup extends GuiElementBuilderPopup<ChemicalGuiElement> {
 
+        private CycleButton<Orientation> orientation;
         private Checkbox highlight;
 
         public ChemicalGuiElementBuilderPopup(BaseScreen parent, MutableProperties properties, @Nullable ChemicalGuiElement from, Consumer<ChemicalGuiElement> onFinish) {
@@ -48,7 +51,7 @@ public class ChemicalGuiElementBuilder implements IGuiElementBuilder<ChemicalGui
 
         @Override
         public ChemicalGuiElement makeElement() {
-            return new ChemicalGuiElement(this.properties.build(), this.highlight.selected());
+            return new ChemicalGuiElement(this.properties.build(), this.orientation.getValue(), this.highlight.selected());
         }
 
         @Override
@@ -63,6 +66,8 @@ public class ChemicalGuiElementBuilder implements IGuiElementBuilder<ChemicalGui
             this.addTexture(row, Component.translatable("custommachinery.gui.creation.gui.texture"), this.properties::setTexture, this.baseElement != null ? this.baseElement.getTexture() : ChemicalGuiElement.BASE_TEXTURE);
             this.addId(row);
             this.addPriority(row);
+            row.addChild(new StringWidget(Component.translatable("custommachinery.gui.creation.gui.bar.orientation"), this.font));
+            this.orientation = row.addChild(CycleButton.<Orientation>builder(orientation -> Component.literal(orientation.name())).withValues(Orientation.values()).withInitialValue(this.baseElement != null ? this.baseElement.getOrientation() : Orientation.TOP).displayOnlyValue().create(0, 0, 100, 20, Component.translatable("custommachinery.gui.creation.gui.bar.orientation")));
             row.addChild(new StringWidget(Component.translatable("custommachinery.gui.creation.gui.highlight"), this.font));
             this.highlight = row.addChild(Checkbox.builder(Component.translatable("custommachinery.gui.creation.gui.highlight"), this.font).selected(this.baseElement == null || this.baseElement.highlight()).build());
         }
