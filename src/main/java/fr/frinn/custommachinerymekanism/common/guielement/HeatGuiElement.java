@@ -5,6 +5,7 @@ import fr.frinn.custommachinery.api.codec.NamedCodec;
 import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.guielement.GuiElementType;
 import fr.frinn.custommachinery.api.guielement.IComponentGuiElement;
+import fr.frinn.custommachinery.common.guielement.ProgressBarGuiElement.Orientation;
 import fr.frinn.custommachinery.impl.guielement.AbstractTexturedGuiElement;
 import fr.frinn.custommachinery.impl.util.TextureInfo;
 import fr.frinn.custommachinerymekanism.CustomMachineryMekanism;
@@ -21,18 +22,21 @@ public class HeatGuiElement extends AbstractTexturedGuiElement implements ICompo
                     makePropertiesCodec().forGetter(HeatGuiElement::getProperties),
                     TextureInfo.CODEC.optionalFieldOf("texture_empty", BASE_TEXTURE).forGetter(HeatGuiElement::getEmptyTexture),
                     TextureInfo.CODEC.optionalFieldOf("texture_filled", BASE_TEXTURE_FILLED).forGetter(HeatGuiElement::getFilledTexture),
+                    NamedCodec.enumCodec(Orientation.class).optionalFieldOf("orientation", Orientation.TOP).aliases("direction").forGetter(HeatGuiElement::getOrientation),
                     NamedCodec.BOOL.optionalFieldOf("highlight", true).forGetter(HeatGuiElement::highlight)
             ).apply(instance, HeatGuiElement::new), "Heat gui element"
     );
 
     private final TextureInfo emptyTexture;
     private final TextureInfo filledTexture;
+    private final Orientation orientation;
     private final boolean highlight;
 
-    public HeatGuiElement(Properties properties, TextureInfo emptyTexture, TextureInfo filledTexture, boolean highlight) {
+    public HeatGuiElement(Properties properties, TextureInfo emptyTexture, TextureInfo filledTexture, Orientation orientation, boolean highlight) {
         super(properties, emptyTexture);
         this.emptyTexture = emptyTexture;
         this.filledTexture = filledTexture;
+        this.orientation = orientation;
         this.highlight = highlight;
     }
 
@@ -42,6 +46,10 @@ public class HeatGuiElement extends AbstractTexturedGuiElement implements ICompo
 
     public TextureInfo getFilledTexture() {
         return this.filledTexture;
+    }
+
+    public Orientation getOrientation() {
+        return this.orientation;
     }
 
     public boolean highlight() {

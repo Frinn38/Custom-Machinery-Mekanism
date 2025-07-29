@@ -4,6 +4,7 @@ import fr.frinn.custommachinery.api.guielement.IMachineScreen;
 import fr.frinn.custommachinery.client.ClientHandler;
 import fr.frinn.custommachinery.impl.guielement.TexturedGuiElementWidget;
 import fr.frinn.custommachinerymekanism.Registration;
+import fr.frinn.custommachinerymekanism.common.component.HeatMachineComponent;
 import fr.frinn.custommachinerymekanism.common.guielement.HeatGuiElement;
 import mekanism.api.IIncrementalEnum;
 import mekanism.common.MekanismLang;
@@ -13,7 +14,6 @@ import mekanism.common.util.UnitDisplayUtils;
 import mekanism.common.util.UnitDisplayUtils.TemperatureUnit;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 
 import java.util.Collections;
 import java.util.List;
@@ -28,12 +28,12 @@ public class HeatGuiElementWidget extends TexturedGuiElementWidget<HeatGuiElemen
 
     @Override
     public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-        this.getScreen().getTile().getComponentManager().getComponent(Registration.HEAT_MACHINE_COMPONENT.get()).ifPresent(component -> {
-            double fillPercent = component.getHeatFillPercent();
-            int barHeight = Mth.clamp((int)(fillPercent * (double)this.height), 1, this.height - 1);
-            graphics.blit(this.getElement().getFilledTexture().texture(), this.getX(), this.getY() + this.height - barHeight, this.getElement().getFilledTexture().u(), this.getElement().getFilledTexture().v() + this.height - barHeight, this.width, barHeight, this.width, this.height);
-        });
+        double percent = this.getScreen().getTile()
+                .getComponentManager()
+                .getComponent(Registration.HEAT_MACHINE_COMPONENT.get())
+                .map(HeatMachineComponent::getHeatFillPercent)
+                .orElse(0.0D);
+        ClientHandler.renderOrientedProgressTextures(graphics, this.getElement().getEmptyTexture(), this.getElement().getFilledTexture(), this.getX(), this.getY(), this.width, this.height, percent, this.getElement().getOrientation());
         if (this.isHovered() && this.getElement().highlight())
             ClientHandler.renderSlotHighlight(graphics, this.getX() + 1, this.getY() + 1, this.width - 2, this.height - 2);
     }
