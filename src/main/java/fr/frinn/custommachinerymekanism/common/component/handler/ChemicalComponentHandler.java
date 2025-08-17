@@ -152,30 +152,30 @@ public class ChemicalComponentHandler extends AbstractComponentHandler<ChemicalM
             for(ChemicalMachineComponent component : this.getComponents()) {
                 if(component.getConfig().isAutoInput() && component.getConfig().getDirectionMode(side).isInput() && component.getStack().getAmount() < component.getCapacity()) {
                     ChemicalStack maxExtract = neighbour.extractChemical(Long.MAX_VALUE, Action.SIMULATE);
-
-                    if(maxExtract.isEmpty())
-                        continue;
-
-                    ChemicalStack remaining = component.insert(maxExtract, Action.SIMULATE, false);
-
-                    if(remaining.getAmount() >= maxExtract.getAmount())
-                        continue;
-
-                    component.insert(neighbour.extractChemical(Long.MAX_VALUE, Action.EXECUTE), Action.EXECUTE, false);
+                    if(!maxExtract.isEmpty()) {
+                        ChemicalStack remaining = component.insert(maxExtract, Action.SIMULATE, false);
+                        ChemicalStack toTransfer = maxExtract.copyWithAmount(maxExtract.getAmount() - remaining.getAmount());
+                        if(!remaining.isEmpty())
+                            toTransfer.setAmount(toTransfer.getAmount() - component.insert(toTransfer, Action.SIMULATE, false).getAmount());
+                        if(!toTransfer.isEmpty()) {
+                            neighbour.extractChemical(toTransfer, Action.EXECUTE);
+                            component.insert(toTransfer, Action.EXECUTE, false);
+                        }
+                    }
                 }
 
                 if(component.getConfig().isAutoOutput() && component.getConfig().getDirectionMode(side).isOutput() && component.getStack().getAmount() > 0) {
                     ChemicalStack maxExtract = component.extract(Long.MAX_VALUE, Action.SIMULATE, false);
-
-                    if(maxExtract.isEmpty())
-                        continue;
-
-                    ChemicalStack remaining = neighbour.insertChemical(maxExtract, Action.SIMULATE);
-
-                    if(remaining.getAmount() >= maxExtract.getAmount() && !remaining.isEmpty())
-                        continue;
-
-                    neighbour.insertChemical(component.extract(Long.MAX_VALUE, Action.EXECUTE, false), Action.EXECUTE);
+                    if(!maxExtract.isEmpty()) {
+                        ChemicalStack remaining = neighbour.insertChemical(maxExtract, Action.SIMULATE);
+                        ChemicalStack toTransfer = maxExtract.copyWithAmount(maxExtract.getAmount() - remaining.getAmount());
+                        if(remaining.getAmount() != 0)
+                            toTransfer = component.extract(toTransfer.getAmount(), Action.SIMULATE, false);
+                        if(!toTransfer.isEmpty()) {
+                            component.extract(toTransfer.getAmount(), Action.EXECUTE, false);
+                            neighbour.insertChemical(toTransfer, Action.EXECUTE);
+                        }
+                    }
                 }
             }
         }

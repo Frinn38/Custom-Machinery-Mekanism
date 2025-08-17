@@ -36,20 +36,24 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
     private final long capacity;
     private final Filter<Chemical> filter;
     private final long maxInput;
+    private final long minInput;
     private final long maxOutput;
+    private final long minOutput;
     private final IOSideConfig config;
     private final boolean unique;
     private final boolean radiations;
 
     private ChemicalStack stack = ChemicalStack.EMPTY;
 
-    public ChemicalMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, IOSideConfig.Template config, boolean unique, boolean radiations) {
+    public ChemicalMachineComponent(IMachineComponentManager manager, String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long minInput, long maxOutput, long minOutput, IOSideConfig.Template config, boolean unique, boolean radiations) {
         super(manager, mode);
         this.id = id;
         this.capacity = capacity;
         this.filter = filter;
         this.maxInput = maxInput;
+        this.minInput = minInput;
         this.maxOutput = maxOutput;
+        this.minOutput = minOutput;
         this.config = config.build(this);
         this.unique = unique;
         this.radiations = radiations;
@@ -108,8 +112,8 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
 
         long maxInsert = this.stack.isEmpty() ? Math.min(this.capacity, stack.getAmount()) : Math.min(this.capacity - this.stack.getAmount(), stack.getAmount());
         if(!byPassLimit)
-            maxInsert = Math.min(maxInsert, this.maxInput);
-        if(action.execute())
+            maxInsert = maxInsert < this.minInput ? 0 : Math.min(maxInsert, this.maxInput);
+        if(maxInsert > 0 && action.execute())
             setStack(new ChemicalStack(stack.getChemicalHolder(), maxInsert + (this.stack.isEmpty() ? 0 : this.stack.getAmount())));
         return new ChemicalStack(stack.getChemicalHolder(), stack.getAmount() - maxInsert);
     }
@@ -121,9 +125,9 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
 
         long maxExtract = Math.min(this.stack.getAmount(), amount);
         if(!byPassLimit)
-            maxExtract = Math.min(maxExtract, this.maxOutput);
+            maxExtract = maxExtract < this.minOutput || this.maxOutput < this.minOutput ? 0 : Math.min(maxExtract, this.maxOutput);
         Holder<Chemical> type = this.stack.getChemicalHolder();
-        if(action.execute()) {
+        if(maxExtract > 0 && action.execute()) {
             this.stack.shrink(maxExtract);
             getManager().markDirty();
         }
@@ -161,7 +165,19 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
         container.accept(DataType.createSyncable(IOSideConfig.class, this::getConfig, this.config::set));
     }
 
-    public record Template(String id, long capacity, ComponentIOMode mode, Filter<Chemical> filter, long maxInput, long maxOutput, IOSideConfig.Template config, boolean unique, boolean radiations) implements IMachineComponentTemplate<ChemicalMachineComponent> {
+    public record Template(
+            String id,
+            long capacity,
+            ComponentIOMode mode,
+            Filter<Chemical> filter,
+            long maxInput,
+            long minInput,
+            long maxOutput,
+            long minOutput,
+            IOSideConfig.Template config,
+            boolean unique,
+            boolean radiations
+    ) implements IMachineComponentTemplate<ChemicalMachineComponent> {
 
         public static NamedCodec<Template> CODEC = NamedCodec.record(templateInstance ->
                 templateInstance.group(
@@ -169,13 +185,15 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
                         NamedCodec.LONG.fieldOf("capacity").forGetter(template -> template.capacity),
                         ComponentIOMode.CODEC.optionalFieldOf("mode", ComponentIOMode.BOTH).forGetter(template -> template.mode),
                         Filter.codec(DefaultCodecs.registryValueOrTag(MekanismAPI.CHEMICAL_REGISTRY)).orElse(Filter.empty()).forGetter(template -> template.filter),
-                        NamedCodec.LONG.optionalFieldOf("max_input").forGetter(template -> template.maxInput == template.capacity ? Optional.empty() : Optional.of(template.maxInput)),
-                        NamedCodec.LONG.optionalFieldOf("max_output").forGetter(template -> template.maxOutput == template.capacity ? Optional.empty() : Optional.of(template.maxOutput)),
+                        NamedCodec.longRange(0, Long.MAX_VALUE).optionalFieldOf("max_input").forGetter(template -> template.maxInput == template.capacity ? Optional.empty() : Optional.of(template.maxInput)),
+                        NamedCodec.longRange(0, Long.MAX_VALUE).optionalFieldOf("min_input", 0L).forGetter(template -> template.minInput),
+                        NamedCodec.longRange(0, Long.MAX_VALUE).optionalFieldOf("max_output").forGetter(template -> template.maxOutput == template.capacity ? Optional.empty() : Optional.of(template.maxOutput)),
+                        NamedCodec.longRange(0, Long.MAX_VALUE).optionalFieldOf("min_output", 0L).forGetter(template -> template.minOutput),
                         IOSideConfig.Template.CODEC.optionalFieldOf("config").forGetter(template -> template.config == template.mode.getBaseConfig() ? Optional.empty() : Optional.of(template.config)),
                         NamedCodec.BOOL.optionalFieldOf("unique", false).forGetter(template -> template.unique),
                         NamedCodec.BOOL.optionalFieldOf("radiations", false).forGetter(template -> template.radiations)
-                ).apply(templateInstance, (id, capacity, mode, filter, maxInput, maxOutput, config, unique, radiations) ->
-                        new Template(id, capacity, mode, filter, maxInput.orElse(capacity), maxOutput.orElse(capacity), config.orElse(mode.getBaseConfig()), unique, radiations)
+                ).apply(templateInstance, (id, capacity, mode, filter, maxInput, minInput, maxOutput, minOutput, config, unique, radiations) ->
+                        new Template(id, capacity, mode, filter, maxInput.orElse(capacity), minInput, maxOutput.orElse(capacity), minOutput, config.orElse(mode.getBaseConfig()), unique, radiations)
                 ), "Chemical machine component"
         );
 
@@ -207,7 +225,7 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
 
         @Override
         public ChemicalMachineComponent build(IMachineComponentManager manager) {
-            return new ChemicalMachineComponent(manager, this.id, this.capacity, this.mode, this.filter, this.maxInput, this.maxOutput, this.config, this.unique, this.radiations);
+            return new ChemicalMachineComponent(manager, this.id, this.capacity, this.mode, this.filter, this.maxInput, this.minInput, this.maxOutput, this.minOutput, this.config, this.unique, this.radiations);
         }
     }
 }

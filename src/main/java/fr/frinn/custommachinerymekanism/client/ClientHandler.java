@@ -29,10 +29,9 @@ import net.minecraft.client.renderer.Rect2i;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.neoforged.fml.common.EventBusSubscriber.Bus;
 import org.jetbrains.annotations.Nullable;
 
-@EventBusSubscriber(modid = CustomMachineryMekanism.MODID, bus = Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(modid = CustomMachineryMekanism.MODID, value = Dist.CLIENT)
 public class ClientHandler {
 
     @SubscribeEvent
