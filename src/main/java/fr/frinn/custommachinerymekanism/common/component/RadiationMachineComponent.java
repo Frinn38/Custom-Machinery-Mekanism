@@ -1,6 +1,5 @@
 package fr.frinn.custommachinerymekanism.common.component;
 
-import com.google.common.base.Suppliers;
 import fr.frinn.custommachinery.api.component.ComponentIOMode;
 import fr.frinn.custommachinery.api.component.IMachineComponentManager;
 import fr.frinn.custommachinery.api.component.MachineComponentType;
@@ -11,30 +10,24 @@ import mekanism.api.radiation.IRadiationManager;
 import mekanism.api.radiation.IRadiationSource;
 import net.minecraft.core.GlobalPos;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
 
 public class RadiationMachineComponent extends AbstractMachineComponent {
 
-    private final Supplier<GlobalPos> coords;
-
     public RadiationMachineComponent(IMachineComponentManager manager) {
         super(manager, ComponentIOMode.NONE);
-        this.coords = Suppliers.memoize(() -> new GlobalPos(manager.getTile().getLevel().dimension(), manager.getTile().getBlockPos()));
     }
 
     public double getRadiations() {
-        return IRadiationManager.INSTANCE.getRadiationLevel(this.coords.get());
+        return IRadiationManager.INSTANCE.getRadiationLevel(getManager().getLevel(), getManager().getTile().getBlockPos());
     }
 
     public void removeRadiations(double amount, int radius) {
-        Set<Chunk3D> checkChunks = new Chunk3D(this.coords.get()).expand((int)Math.ceil(radius / 16.0D));
+        Set<Chunk3D> checkChunks = new Chunk3D(new GlobalPos(getManager().getLevel().dimension(), getManager().getTile().getBlockPos())).expand((int)Math.ceil(radius / 16.0D));
 
-        for (Chunk3D chunk : checkChunks) {
-            for (Map.Entry<GlobalPos, IRadiationSource> entry : IRadiationManager.INSTANCE.getRadiationSources().row(chunk).entrySet()) {
-                if(entry.getKey().pos().distSqr(this.coords.get().pos()) <= radius * radius) {
-                    IRadiationSource source = entry.getValue();
+        for(Chunk3D chunk : checkChunks) {
+            for(IRadiationSource source : IRadiationManager.INSTANCE.getRadiationSources(getManager().getLevel(), chunk.x, chunk.z)) {
+                if(source.getPosition().distSqr(getManager().getTile().getBlockPos()) <= radius * radius) {
                     double toRemove = Math.min(source.getMagnitude(), amount);
                     source.radiate(-toRemove);
                     amount -= toRemove;
@@ -46,7 +39,7 @@ public class RadiationMachineComponent extends AbstractMachineComponent {
     }
 
     public void addRadiations(double amount) {
-        IRadiationManager.INSTANCE.radiate(this.coords.get(), amount);
+        IRadiationManager.INSTANCE.radiate(getManager().getLevel(), getManager().getTile().getBlockPos(), amount);
     }
 
     @Override

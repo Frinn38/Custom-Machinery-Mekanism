@@ -5,7 +5,6 @@ import fr.frinn.custommachinery.common.init.CustomMachineTile;
 import fr.frinn.custommachinerymekanism.Registration;
 import mekanism.common.lib.radiation.RadiationManager;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.GlobalPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,7 +23,7 @@ public abstract class CustomMachineBlockMixin {
                     .ifPresent(handler -> handler.getComponents()
                             .stream()
                             .filter(component -> component.emitRadiationsWhenBroken() && component.getStack().isRadioactive())
-                            .forEach(component -> RadiationManager.get().dumpRadiation(GlobalPos.of(serverLevel.dimension(), pos), component.getStack()))
+                            .forEach(component -> RadiationManager.get().dumpRadiation(serverLevel, pos, component.getStack()))
                     );
         }
     }
