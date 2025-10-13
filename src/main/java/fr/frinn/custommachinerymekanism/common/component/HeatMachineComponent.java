@@ -93,10 +93,6 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
         return this.lastEnvironmentalLoss;
     }
 
-    public double getHeatFillPercent() {
-        return (this.capacitor.getTemperature() - this.baseTemp) / this.capacitor.getHeatCapacity();
-    }
-
     private void onConfigChange(RelativeSide side, ToggleSideMode old, ToggleSideMode now) {
         if(old != now)
             this.getManager().getTile().invalidateCapabilities();

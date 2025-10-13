@@ -23,6 +23,8 @@ public class HeatGuiElement extends AbstractTexturedGuiElement implements ICompo
                     TextureInfo.CODEC.optionalFieldOf("texture_empty", BASE_TEXTURE).forGetter(HeatGuiElement::getEmptyTexture),
                     TextureInfo.CODEC.optionalFieldOf("texture_filled", BASE_TEXTURE_FILLED).forGetter(HeatGuiElement::getFilledTexture),
                     NamedCodec.enumCodec(Orientation.class).optionalFieldOf("orientation", Orientation.TOP).aliases("direction").forGetter(HeatGuiElement::getOrientation),
+                    NamedCodec.doubleRange(0.0D, Double.MAX_VALUE).optionalFieldOf("min", 300.0D).forGetter(HeatGuiElement::getMin),
+                    NamedCodec.doubleRange(1.0D, Double.MAX_VALUE).optionalFieldOf("max", 400.0D).forGetter(HeatGuiElement::getMax),
                     NamedCodec.BOOL.optionalFieldOf("highlight", true).forGetter(HeatGuiElement::highlight)
             ).apply(instance, HeatGuiElement::new), "Heat gui element"
     );
@@ -30,13 +32,17 @@ public class HeatGuiElement extends AbstractTexturedGuiElement implements ICompo
     private final TextureInfo emptyTexture;
     private final TextureInfo filledTexture;
     private final Orientation orientation;
+    private final double min;
+    private final double max;
     private final boolean highlight;
 
-    public HeatGuiElement(Properties properties, TextureInfo emptyTexture, TextureInfo filledTexture, Orientation orientation, boolean highlight) {
+    public HeatGuiElement(Properties properties, TextureInfo emptyTexture, TextureInfo filledTexture, Orientation orientation, double min, double max, boolean highlight) {
         super(properties, emptyTexture);
         this.emptyTexture = emptyTexture;
         this.filledTexture = filledTexture;
         this.orientation = orientation;
+        this.min = min;
+        this.max = max;
         this.highlight = highlight;
     }
 
@@ -50,6 +56,14 @@ public class HeatGuiElement extends AbstractTexturedGuiElement implements ICompo
 
     public Orientation getOrientation() {
         return this.orientation;
+    }
+
+    public double getMin() {
+        return this.min;
+    }
+
+    public double getMax() {
+        return this.max;
     }
 
     public boolean highlight() {

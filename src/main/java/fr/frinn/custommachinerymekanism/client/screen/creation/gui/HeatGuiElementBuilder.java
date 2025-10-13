@@ -7,6 +7,7 @@ import fr.frinn.custommachinery.client.screen.creation.gui.GuiElementBuilderPopu
 import fr.frinn.custommachinery.client.screen.creation.gui.IGuiElementBuilder;
 import fr.frinn.custommachinery.client.screen.creation.gui.MutableProperties;
 import fr.frinn.custommachinery.client.screen.popup.PopupScreen;
+import fr.frinn.custommachinery.client.screen.widget.DoubleSlider;
 import fr.frinn.custommachinery.common.guielement.ProgressBarGuiElement.Orientation;
 import fr.frinn.custommachinery.impl.guielement.AbstractGuiElement.Properties;
 import fr.frinn.custommachinery.impl.util.TextureInfo;
@@ -15,6 +16,7 @@ import fr.frinn.custommachinerymekanism.common.guielement.HeatGuiElement;
 import net.minecraft.client.gui.components.Checkbox;
 import net.minecraft.client.gui.components.CycleButton;
 import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.layouts.GridLayout.RowHelper;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -31,9 +33,9 @@ public class HeatGuiElementBuilder implements IGuiElementBuilder<HeatGuiElement>
     @Override
     public HeatGuiElement make(Properties properties, @Nullable HeatGuiElement from) {
         if(from != null)
-            return new HeatGuiElement(properties, from.getEmptyTexture(), from.getFilledTexture(), from.getOrientation(), from.highlight());
+            return new HeatGuiElement(properties, from.getEmptyTexture(), from.getFilledTexture(), from.getOrientation(), from.getMin(), from.getMax(), from.highlight());
         else
-            return new HeatGuiElement(properties, HeatGuiElement.BASE_TEXTURE, HeatGuiElement.BASE_TEXTURE_FILLED, Orientation.TOP, true);
+            return new HeatGuiElement(properties, HeatGuiElement.BASE_TEXTURE, HeatGuiElement.BASE_TEXTURE_FILLED, Orientation.TOP, 300.0D, 400.0D, true);
     }
 
     @Override
@@ -46,6 +48,8 @@ public class HeatGuiElementBuilder implements IGuiElementBuilder<HeatGuiElement>
         private TextureInfo textureEmpty = HeatGuiElement.BASE_TEXTURE;
         private TextureInfo textureFilled = HeatGuiElement.BASE_TEXTURE_FILLED;
         private CycleButton<Orientation> orientation;
+        private DoubleSlider min;
+        private DoubleSlider max;
         private Checkbox highlight;
 
         public HeatGuiElementBuilderPopup(BaseScreen parent, MutableProperties properties, @Nullable HeatGuiElement from, Consumer<HeatGuiElement> onFinish) {
@@ -58,7 +62,7 @@ public class HeatGuiElementBuilder implements IGuiElementBuilder<HeatGuiElement>
 
         @Override
         public HeatGuiElement makeElement() {
-            return new HeatGuiElement(this.properties.build(), this.textureEmpty, this.textureFilled, this.orientation.getValue(), this.highlight.selected());
+            return new HeatGuiElement(this.properties.build(), this.textureEmpty, this.textureFilled, this.orientation.getValue(), this.min.doubleValue(), this.max.doubleValue(), this.highlight.selected());
         }
 
         @Override
@@ -68,6 +72,12 @@ public class HeatGuiElementBuilder implements IGuiElementBuilder<HeatGuiElement>
             this.addPriority(row);
             row.addChild(new StringWidget(Component.translatable("custommachinery.gui.creation.gui.bar.orientation"), this.font));
             this.orientation = row.addChild(CycleButton.<Orientation>builder(orientation -> Component.literal(orientation.name())).withValues(Orientation.values()).withInitialValue(this.baseElement != null ? this.baseElement.getOrientation() : Orientation.TOP).displayOnlyValue().create(0, 0, 100, 20, Component.translatable("custommachinery.gui.creation.gui.bar.orientation")));
+            row.addChild(new StringWidget(Component.translatable("custommachinerymekanism.gui.creation.gui.heat.min"), this.font));
+            this.min = row.addChild(DoubleSlider.builder().defaultValue(this.baseElement == null ? 300.0D : this.baseElement.getMin()).displayOnlyValue().bounds(0.0D, 10000.0D).create(0, 0, 100, 20, Component.empty()));
+            this.min.setTooltip(Tooltip.create(Component.translatable("custommachinerymekanism.gui.creation.gui.heat.min.tooltip")));
+            row.addChild(new StringWidget(Component.translatable("custommachinerymekanism.gui.creation.gui.heat.max"), this.font));
+            this.max = row.addChild(DoubleSlider.builder().defaultValue(this.baseElement == null ? 400.0D : this.baseElement.getMax()).displayOnlyValue().bounds(1.0D, 10000.0D).create(0, 0, 100, 20, Component.empty()));
+            this.max.setTooltip(Tooltip.create(Component.translatable("custommachinerymekanism.gui.creation.gui.heat.max.tooltip")));
             row.addChild(new StringWidget(Component.translatable("custommachinery.gui.creation.gui.highlight"), this.font));
             this.highlight = row.addChild(Checkbox.builder(Component.translatable("custommachinery.gui.creation.gui.highlight"), this.font).selected(this.baseElement == null || this.baseElement.highlight()).build());
         }

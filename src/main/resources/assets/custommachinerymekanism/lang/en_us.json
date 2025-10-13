@@ -22,6 +22,11 @@
   "custommachinerymekanism.gui.creation.components.chemical.radiations": "Radiations",
   "custommachinerymekanism.gui.creation.components.chemical.radiations.tooltip": "Emit radiations when the machine is broken and contains radioactive chemical",
 
+  "custommachinerymekanism.gui.creation.gui.heat.min": "Min",
+  "custommachinerymekanism.gui.creation.gui.heat.min.tooltip": "Minimal temperature displayed by the bar",
+  "custommachinerymekanism.gui.creation.gui.heat.max": "Max",
+  "custommachinerymekanism.gui.creation.gui.heat.max.tooltip": "Maximal temperature displayed by the bar",
+
   "custommachinerymekanism.jei.ingredient.heat": "Heat:  %s",
   "custommachinerymekanism.jei.ingredient.heat.input": "Consume %sHeat",
   "custommachinerymekanism.jei.ingredient.heat.output": "Produce %sHeat",

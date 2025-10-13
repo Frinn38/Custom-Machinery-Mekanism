@@ -4,7 +4,6 @@ import fr.frinn.custommachinery.api.guielement.IMachineScreen;
 import fr.frinn.custommachinery.client.ClientHandler;
 import fr.frinn.custommachinery.impl.guielement.TexturedGuiElementWidget;
 import fr.frinn.custommachinerymekanism.Registration;
-import fr.frinn.custommachinerymekanism.common.component.HeatMachineComponent;
 import fr.frinn.custommachinerymekanism.common.guielement.HeatGuiElement;
 import mekanism.api.IIncrementalEnum;
 import mekanism.common.MekanismLang;
@@ -31,7 +30,7 @@ public class HeatGuiElementWidget extends TexturedGuiElementWidget<HeatGuiElemen
         double percent = this.getScreen().getTile()
                 .getComponentManager()
                 .getComponent(Registration.HEAT_MACHINE_COMPONENT.get())
-                .map(HeatMachineComponent::getHeatFillPercent)
+                .map(component -> Math.max((component.getTemperature(0) - this.getElement().getMin()) / this.getElement().getMax(), 0.0D))
                 .orElse(0.0D);
         ClientHandler.renderOrientedProgressTextures(graphics, this.getElement().getEmptyTexture(), this.getElement().getFilledTexture(), this.getX(), this.getY(), this.width, this.height, percent, this.getElement().getOrientation());
         if (this.isHovered() && this.getElement().highlight())
