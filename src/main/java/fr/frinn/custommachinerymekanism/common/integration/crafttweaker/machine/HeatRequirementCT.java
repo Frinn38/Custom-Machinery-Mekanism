@@ -4,7 +4,7 @@ import com.blamejared.crafttweaker.api.annotation.ZenRegister;
 import fr.frinn.custommachinery.api.requirement.RequirementIOMode;
 import fr.frinn.custommachinery.common.integration.crafttweaker.CTConstants;
 import fr.frinn.custommachinery.common.integration.crafttweaker.CustomMachineRecipeCTBuilder;
-import fr.frinn.custommachinery.impl.util.IntRange;
+import fr.frinn.custommachinery.impl.util.DoubleRange;
 import fr.frinn.custommachinerymekanism.common.requirement.HeatPerTickRequirement;
 import fr.frinn.custommachinerymekanism.common.requirement.HeatRequirement;
 import fr.frinn.custommachinerymekanism.common.requirement.TemperatureRequirement;
@@ -41,7 +41,7 @@ public class HeatRequirementCT {
     @Method
     public static CustomMachineRecipeCTBuilder requireTemp(CustomMachineRecipeCTBuilder builder, String range, String unit) {
         try {
-            IntRange temp = IntRange.createFromString(range);
+            DoubleRange temp = DoubleRange.createFromString(range);
             try {
                 TemperatureUnit temperatureUnit = TemperatureUnit.valueOf(unit.toUpperCase(Locale.ROOT));
                 return builder.addRequirement(new TemperatureRequirement(temp, temperatureUnit));

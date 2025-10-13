@@ -22,7 +22,7 @@ import net.minecraft.network.chat.Component;
 import java.util.Collections;
 import java.util.List;
 
-public class HeatRequirement implements IRequirement<HeatMachineComponent>, IJEIIngredientRequirement<Heat> {
+public record HeatRequirement(RequirementIOMode mode, double amount) implements IRequirement<HeatMachineComponent>, IJEIIngredientRequirement<Heat> {
 
     public static final NamedCodec<HeatRequirement> CODEC = NamedCodec.record(heatRequirementInstance ->
             heatRequirementInstance.group(
@@ -30,14 +30,6 @@ public class HeatRequirement implements IRequirement<HeatMachineComponent>, IJEI
                     NamedCodec.doubleRange(0.0D, Double.MAX_VALUE).fieldOf("amount").forGetter(requirement -> requirement.amount)
             ).apply(heatRequirementInstance, HeatRequirement::new), "Heat requirement"
     );
-
-    private final RequirementIOMode mode;
-    private final double amount;
-
-    public HeatRequirement(RequirementIOMode mode, double amount) {
-        this.mode = mode;
-        this.amount = amount;
-    }
 
     @Override
     public RequirementType<HeatRequirement> getType() {
@@ -57,14 +49,14 @@ public class HeatRequirement implements IRequirement<HeatMachineComponent>, IJEI
     @Override
     public boolean test(HeatMachineComponent component, ICraftingContext context) {
         double amount = context.getModifiedValue(this.amount, this, null);
-        if(getMode() == RequirementIOMode.INPUT)
+        if (getMode() == RequirementIOMode.INPUT)
             return component.getHeatCapacitors(null).getFirst().getHeat() >= amount;
         return true;
     }
 
     @Override
     public void gatherRequirements(IRequirementList<HeatMachineComponent> list) {
-        if(this.mode == RequirementIOMode.INPUT)
+        if (this.mode == RequirementIOMode.INPUT)
             list.processDelayed(0, this::processInput);
         else
             list.processDelayed(1, this::processOutput);
@@ -73,15 +65,15 @@ public class HeatRequirement implements IRequirement<HeatMachineComponent>, IJEI
     private CraftingResult processInput(HeatMachineComponent component, ICraftingContext context) {
         double amount = context.getModifiedValue(this.amount, this, null);
         IHeatCapacitor capacitor = component.getHeatCapacitors(null).get(0);
-        if(capacitor.getHeat() < amount)
+        if (capacitor.getHeat() < amount)
             return CraftingResult.error(Component.translatable("custommachinerymekanism.requirements.heat.error.input", amount, capacitor.getHeat()));
-        capacitor.handleHeat(-amount);
+        component.handleHeatAndUpdate(-amount);
         return CraftingResult.success();
     }
 
     private CraftingResult processOutput(HeatMachineComponent component, ICraftingContext context) {
         double amount = context.getModifiedValue(this.amount, this, null);
-        component.getHeatCapacitors(null).getFirst().handleHeat(amount);
+        component.handleHeatAndUpdate(amount);
         return CraftingResult.success();
     }
 

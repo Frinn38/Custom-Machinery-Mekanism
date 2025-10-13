@@ -4,7 +4,7 @@ import fr.frinn.custommachinery.api.guielement.IGuiElement;
 import fr.frinn.custommachinery.api.integration.jei.IJEIIngredientWrapper;
 import fr.frinn.custommachinery.api.integration.jei.IRecipeHelper;
 import fr.frinn.custommachinery.api.requirement.RequirementIOMode;
-import fr.frinn.custommachinery.impl.util.IntRange;
+import fr.frinn.custommachinery.impl.util.DoubleRange;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.client.jei.CMMJeiPlugin;
 import fr.frinn.custommachinerymekanism.client.jei.heat.Heat;
@@ -18,11 +18,11 @@ import net.minecraft.network.chat.Component;
 
 public class TemperatureIngredientWrapper implements IJEIIngredientWrapper<Heat> {
 
-    private final IntRange temp;
+    private final DoubleRange temp;
     private final TemperatureUnit unit;
     private final Heat ingredient;
 
-    public TemperatureIngredientWrapper(IntRange temp, TemperatureUnit unit) {
+    public TemperatureIngredientWrapper(DoubleRange temp, TemperatureUnit unit) {
         this.temp = temp;
         this.unit = unit;
         this.ingredient = new Heat(0, 1, false, RequirementIOMode.INPUT);

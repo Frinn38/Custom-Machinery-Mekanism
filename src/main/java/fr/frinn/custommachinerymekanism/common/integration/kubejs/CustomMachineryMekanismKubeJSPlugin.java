@@ -9,6 +9,7 @@ import dev.latvian.mods.kubejs.script.TypeWrapperRegistry.ContextFromFunction;
 import dev.latvian.mods.rhino.Wrapper;
 import dev.latvian.mods.rhino.type.TypeInfo;
 import dev.latvian.mods.rhino.util.wrap.TypeWrapperFactory;
+import fr.frinn.custommachinerymekanism.common.util.DoubleRange;
 import mekanism.api.MekanismAPI;
 import mekanism.api.chemical.Chemical;
 import mekanism.api.chemical.ChemicalStack;
@@ -27,6 +28,7 @@ public class CustomMachineryMekanismKubeJSPlugin implements KubeJSPlugin {
         if(!ModList.get().isLoaded("kubejs_mekanism"))
             registry.register(ChemicalStack.class, (ContextFromFunction<ChemicalStack>) (ctx, o) -> of(o));
         registry.register(TemperatureUnit.class, (TypeWrapperFactory<TemperatureUnit>) TypeInfo.of(TemperatureUnit.class));
+        registry.register(DoubleRange.class, DoubleRange::of);
     }
 
     private static ChemicalStack of(Object o) {

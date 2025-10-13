@@ -2,7 +2,7 @@ package fr.frinn.custommachinerymekanism.common.integration.kubejs;
 
 import fr.frinn.custommachinery.api.integration.kubejs.RecipeJSBuilder;
 import fr.frinn.custommachinery.api.requirement.RequirementIOMode;
-import fr.frinn.custommachinery.impl.util.IntRange;
+import fr.frinn.custommachinery.impl.util.DoubleRange;
 import fr.frinn.custommachinerymekanism.common.requirement.HeatPerTickRequirement;
 import fr.frinn.custommachinerymekanism.common.requirement.HeatRequirement;
 import fr.frinn.custommachinerymekanism.common.requirement.TemperatureRequirement;
@@ -26,27 +26,27 @@ public interface HeatRequirementJS extends RecipeJSBuilder {
         return addRequirement(new HeatPerTickRequirement(RequirementIOMode.OUTPUT, amount));
     }
 
-    default RecipeJSBuilder requireTemp(IntRange range, TemperatureUnit unit) {
+    default RecipeJSBuilder requireTemp(DoubleRange range, TemperatureUnit unit) {
         return addRequirement(new TemperatureRequirement(range, unit));
     }
 
-    default RecipeJSBuilder requireTempKelvin(IntRange range) {
+    default RecipeJSBuilder requireTempKelvin(DoubleRange range) {
         return requireTemp(range, TemperatureUnit.KELVIN);
     }
 
-    default RecipeJSBuilder requireTempCelsius(IntRange range) {
+    default RecipeJSBuilder requireTempCelsius(DoubleRange range) {
         return requireTemp(range, TemperatureUnit.CELSIUS);
     }
 
-    default RecipeJSBuilder requireTempFahrenheit(IntRange range) {
+    default RecipeJSBuilder requireTempFahrenheit(DoubleRange range) {
         return requireTemp(range, TemperatureUnit.FAHRENHEIT);
     }
 
-    default RecipeJSBuilder requireTempRankine(IntRange range) {
+    default RecipeJSBuilder requireTempRankine(DoubleRange range) {
         return requireTemp(range, TemperatureUnit.RANKINE);
     }
 
-    default RecipeJSBuilder requireTempAmbient(IntRange range) {
+    default RecipeJSBuilder requireTempAmbient(DoubleRange range) {
         return requireTemp(range, TemperatureUnit.AMBIENT);
     }
 }

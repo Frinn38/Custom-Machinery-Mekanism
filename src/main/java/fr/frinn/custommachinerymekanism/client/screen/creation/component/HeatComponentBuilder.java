@@ -61,7 +61,7 @@ public class HeatComponentBuilder implements IMachineComponentBuilder<HeatMachin
             super.init();
 
             //Capacity
-            this.capacity = this.propertyList.add(Component.translatable("custommachinerymekanism.gui.creation.components.heat.capacity"), DoubleSlider.builder().bounds(0.0D, 10000.0D).defaultValue(this.baseTemplate().map(Template::capacity).orElse(373.0D)).displayOnlyValue().create(0, 0, 140, 20, Component.translatable("custommachinerymekanism.gui.creation.components.heat.capacity")));
+            this.capacity = this.propertyList.add(Component.translatable("custommachinerymekanism.gui.creation.components.heat.capacity"), DoubleSlider.builder().bounds(1.0D, 100.0D).defaultValue(this.baseTemplate().map(Template::capacity).orElse(1.0D)).displayOnlyValue().create(0, 0, 140, 20, Component.translatable("custommachinerymekanism.gui.creation.components.heat.capacity")));
             this.capacity.setTooltip(Tooltip.create(Component.translatable("custommachinerymekanism.gui.creation.components.heat.capacity.tooltip")));
 
             //Base Heat

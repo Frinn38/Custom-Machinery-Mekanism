@@ -11,7 +11,7 @@
 
   "custommachinerymekanism.gui.creation.components.heat.title": "Heat component",
   "custommachinerymekanism.gui.creation.components.heat.capacity": "Capacity",
-  "custommachinerymekanism.gui.creation.components.heat.capacity.tooltip": "The max temperature (in Kelvin) the machine can handle",
+  "custommachinerymekanism.gui.creation.components.heat.capacity.tooltip": "The amount of heat (in Kelvin) needed to heat up the machine from 1K",
   "custommachinerymekanism.gui.creation.components.heat.base": "Base temperature",
   "custommachinerymekanism.gui.creation.components.heat.base.tooltip": "The temperature (in Kelvin) the machine will have when no heat is provided",
   "custommachinerymekanism.gui.creation.components.heat.conduction": "Conduction",

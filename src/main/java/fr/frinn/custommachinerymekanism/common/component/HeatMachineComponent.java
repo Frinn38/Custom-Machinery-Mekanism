@@ -84,6 +84,11 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
         this.capacitor.setHeat(this.baseTemp);
     }
 
+    public void handleHeatAndUpdate(double heat) {
+        this.capacitor.handleHeat(heat);
+        this.capacitor.update();
+    }
+
     public double getLastEnvironmentalLoss() {
         return this.lastEnvironmentalLoss;
     }
@@ -159,7 +164,7 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
 
         public static final NamedCodec<Template> CODEC = NamedCodec.record(templateInstance ->
                 templateInstance.group(
-                        NamedCodec.DOUBLE.optionalFieldOf("capacity", 373.0D).forGetter(template -> template.capacity),
+                        NamedCodec.doubleRange(1.0D, Double.MAX_VALUE).optionalFieldOf("capacity", 1.0D).forGetter(template -> template.capacity),
                         NamedCodec.DOUBLE.optionalFieldOf("base_temp", 300.0D).forGetter(template -> template.baseTemp),
                         NamedCodec.DOUBLE.optionalFieldOf("conduction", 1.0D).forGetter(template -> template.inverseConductionCoefficient),
                         NamedCodec.DOUBLE.optionalFieldOf("insulation", 0.0D).forGetter(template -> template.inverseInsulationCoefficient),
