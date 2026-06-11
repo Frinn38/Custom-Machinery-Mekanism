@@ -51,7 +51,7 @@ public class HeatMachineComponent extends AbstractMachineComponent implements IS
     public HeatMachineComponent(IMachineComponentManager manager, double capacity, double baseTemp, double inverseConductionCoefficient, double inverseInsulationCoefficient, ToggleSideConfig.Template config) {
         super(manager, ComponentIOMode.BOTH);
         this.baseTemp = baseTemp;
-        this.config = config.build(this);
+        this.config = config.build(manager.facing());
         this.config.setCallback(this::onConfigChange);
         this.capacitor = BasicHeatCapacitor.create(capacity, inverseConductionCoefficient, inverseInsulationCoefficient, () -> baseTemp, this);
     }

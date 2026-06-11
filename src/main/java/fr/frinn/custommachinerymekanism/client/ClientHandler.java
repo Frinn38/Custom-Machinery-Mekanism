@@ -71,23 +71,11 @@ public class ClientHandler {
             ChemicalMachineComponent component = widget.getScreen().getTile().getComponentManager().getComponentHandler(Registration.CHEMICAL_MACHINE_COMPONENT.get()).flatMap(handler -> handler.getComponentForID(widget.getElement().getComponentId())).orElse(null);
             if(component == null)
                 return null;
-            return helpers.getIngredientManager().createTypedIngredient(component.getStack()).map(ingredient ->
+            return helpers.getIngredientManager().createTypedIngredient(component.getStack(), false).map(ingredient ->
                 new IClickableIngredient<ChemicalStack>() {
-                    //Safe to remove
-                    @SuppressWarnings("removal")
                     @Override
                     public ITypedIngredient<ChemicalStack> getTypedIngredient() {
                         return ingredient;
-                    }
-
-                    @Override
-                    public ChemicalStack getIngredient() {
-                        return ingredient.getIngredient();
-                    }
-
-                    @Override
-                    public IIngredientType<ChemicalStack> getIngredientType() {
-                        return MekanismJEI.TYPE_CHEMICAL;
                     }
 
                     @Override

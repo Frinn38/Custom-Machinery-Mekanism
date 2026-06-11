@@ -54,7 +54,7 @@ public class ChemicalMachineComponent extends AbstractMachineComponent implement
         this.minInput = minInput;
         this.maxOutput = maxOutput;
         this.minOutput = minOutput;
-        this.config = config.build(this);
+        this.config = config.build(manager.facing());
         this.unique = unique;
         this.radiations = radiations;
     }
