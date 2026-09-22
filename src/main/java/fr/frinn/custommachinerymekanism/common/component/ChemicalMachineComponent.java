@@ -11,7 +11,7 @@ import fr.frinn.custommachinery.api.component.MachineComponentType;
 import fr.frinn.custommachinery.api.network.DataType;
 import fr.frinn.custommachinery.api.network.ISyncable;
 import fr.frinn.custommachinery.api.network.ISyncableStuff;
-import fr.frinn.custommachinery.api.utils.Filter;
+import fr.frinn.custommachinery.common.util.Filter;
 import fr.frinn.custommachinery.impl.codec.DefaultCodecs;
 import fr.frinn.custommachinery.impl.component.AbstractMachineComponent;
 import fr.frinn.custommachinery.impl.component.config.IOSideConfig;

@@ -3,7 +3,6 @@ package fr.frinn.custommachinerymekanism.client.screen.creation.component;
 import com.mojang.blaze3d.systems.RenderSystem;
 import fr.frinn.custommachinery.api.component.ComponentIOMode;
 import fr.frinn.custommachinery.api.component.MachineComponentType;
-import fr.frinn.custommachinery.api.utils.Filter;
 import fr.frinn.custommachinery.client.screen.BaseScreen;
 import fr.frinn.custommachinery.client.screen.creation.MachineEditScreen;
 import fr.frinn.custommachinery.client.screen.creation.component.ComponentBuilderPopup;
@@ -12,6 +11,7 @@ import fr.frinn.custommachinery.client.screen.creation.component.FilterConfigPop
 import fr.frinn.custommachinery.client.screen.creation.component.FilterConfigPopup.FilterBuilderHelper;
 import fr.frinn.custommachinery.client.screen.creation.component.IMachineComponentBuilder;
 import fr.frinn.custommachinery.client.screen.popup.PopupScreen;
+import fr.frinn.custommachinery.common.util.Filter;
 import fr.frinn.custommachinery.impl.component.config.IOSideConfig;
 import fr.frinn.custommachinerymekanism.Registration;
 import fr.frinn.custommachinerymekanism.common.component.ChemicalMachineComponent;
